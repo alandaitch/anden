@@ -7,8 +7,8 @@ import SwiftUI
 struct RootView: View {
     var body: some View {
         TabView {
-            NearbyView()
-                .tabItem { Label("Cercanas", systemImage: "location.fill") }
+            CercaView()
+                .tabItem { Label("Cerca", systemImage: "location.fill") }
 
             FavoritesView()
                 .tabItem { Label("Favoritos", systemImage: "star.fill") }

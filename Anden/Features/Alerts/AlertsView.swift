@@ -31,11 +31,21 @@ struct AlertsView: View {
                 Task { await load() }
             }
         } else if alerts.isEmpty {
-            EmptyStateView(
-                icon: "checkmark.seal.fill",
-                title: "Todo en orden",
-                message: "Sin alertas. Todo el servicio normal."
-            )
+            ScrollView {
+                VStack(spacing: 16) {
+                    EmptyStateView(
+                        icon: "checkmark.seal.fill",
+                        title: "Todo en orden",
+                        message: "Sin alertas de tren. Todo el servicio normal."
+                    )
+
+                    SectionHeaderView(title: "Subte")
+                        .padding(.top, 8)
+                    SubteAlertsSection()
+                }
+                .padding(.top, 8)
+                .padding(.bottom, 24)
+            }
         } else {
             ScrollView {
                 VStack(spacing: 16) {
@@ -58,6 +68,10 @@ struct AlertsView: View {
                         }
                         .padding(.horizontal, 16)
                     }
+
+                    SectionHeaderView(title: "Subte")
+                        .padding(.top, 8)
+                    SubteAlertsSection()
                 }
                 .padding(.top, 8)
                 .padding(.bottom, 24)

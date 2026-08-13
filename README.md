@@ -37,6 +37,10 @@ Igual que arriba pero con **[SideStore](https://sidestore.io)**. Requiere un pai
 
 ## Funciones
 
+- **Multimodal** — pestaña "Cerca" con selector **Tren · Subte · Bici**:
+  - **Subte en vivo**: líneas A–H con sus colores oficiales, arribos por estación con demora real y estado de servicio.
+  - **EcoBici en vivo**: estaciones más cercanas con bicis mecánicas/eléctricas y anclajes libres.
+  - _Subte y Bici usan la API de Transporte de la Ciudad_ (ver [Configurar la API de la Ciudad](#configurar-la-api-de-la-ciudad-subte--ecobici)).
 - **Cercanas**: ordena las estaciones por tu ubicación y muestra el próximo tren de cada una.
 - **Tablero de estación**: countdown grande, andén, demora con color (en horario / leve / fuerte / sin dato), destino y ramal.
 - **Favoritos con contexto**: marcá una estación; prioriza "casa" a la mañana y "trabajo" a la tarde.
@@ -84,6 +88,16 @@ open Anden.xcodeproj
 En Xcode, elegí tu equipo de firma en **Signing & Capabilities** (cambiá `DEVELOPMENT_TEAM` en `project.yml` por el tuyo) y corré en el simulador o en tu iPhone.
 
 > Con una cuenta de Apple gratuita (Personal Team) la app se instala en tu propio iPhone, pero el perfil dura 7 días y hay que reinstalar. Las notificaciones push en tiempo real no son posibles sin un servidor propio; ver [`docs/ios-tech.md`](docs/ios-tech.md).
+
+## Configurar la API de la Ciudad (Subte + EcoBici)
+
+El **tren** anda sin configurar nada. Para **Subte** y **EcoBici** hace falta una key gratis de la API de Transporte de la Ciudad de Buenos Aires:
+
+1. Sacá tu `client_id` y `client_secret` en [api-transporte.buenosaires.gob.ar](https://api-transporte.buenosaires.gob.ar).
+2. Copiá `Anden/Resources/Secrets.example.plist` a `Anden/Resources/Secrets.plist`.
+3. Pegá tus credenciales ahí. `Secrets.plist` está en `.gitignore`: **nunca se commitea**.
+
+Sin la key, la app funciona igual pero Subte y Bici muestran "configurá la API".
 
 ## Créditos
 

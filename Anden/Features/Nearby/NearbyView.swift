@@ -7,46 +7,56 @@ import Observation
 // ya cargado, y lista el resto con distancia. Push al Buscador y al Tablero
 // conviven en el mismo NavigationStack.
 struct NearbyView: View {
-    @State private var locationManager = LocationManager.shared
-    @State private var viewModel = NearbyViewModel()
     @State private var path = NavigationPath()
 
-    private enum NearbyRoute: Hashable {
+    var body: some View {
+        NavigationStack(path: $path) {
+            NearbyContent(path: $path)
+        }
+    }
+}
+
+// Contenido de "Cercanas" SIN NavigationStack propio. El contenedor (NearbyView
+// o CercaView) provee el stack. Registra sus destinos y recibe el path por binding.
+struct NearbyContent: View {
+    @State private var locationManager = LocationManager.shared
+    @State private var viewModel = NearbyViewModel()
+    @Binding var path: NavigationPath
+
+    enum NearbyRoute: Hashable {
         case search
     }
 
     var body: some View {
-        NavigationStack(path: $path) {
-            content
-                .background(Palette.background)
-                .navigationTitle("Cercanas")
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            path.append(NearbyRoute.search)
-                        } label: {
-                            Image(systemName: "magnifyingglass")
-                        }
-                        .accessibilityLabel("Buscar estación")
+        content
+            .background(Palette.background)
+            .navigationTitle("Cercanas")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        path.append(NearbyRoute.search)
+                    } label: {
+                        Image(systemName: "magnifyingglass")
                     }
+                    .accessibilityLabel("Buscar estación")
                 }
-                .navigationDestination(for: NearbyRoute.self) { route in
-                    switch route {
-                    case .search:
-                        SearchView()
-                    }
+            }
+            .navigationDestination(for: NearbyRoute.self) { route in
+                switch route {
+                case .search:
+                    SearchView()
                 }
-                .navigationDestination(for: Station.self) { station in
-                    StationBoardView(station: station)
-                }
-        }
-        .task {
-            locationManager.startUpdatingLocation()
-        }
-        .task(id: nearbyStationIds) {
-            guard !nearbyStations.isEmpty else { return }
-            await viewModel.loadNextArrivals(for: nearbyStations)
-        }
+            }
+            .navigationDestination(for: Station.self) { station in
+                StationBoardView(station: station)
+            }
+            .task {
+                locationManager.startUpdatingLocation()
+            }
+            .task(id: nearbyStationIds) {
+                guard !nearbyStations.isEmpty else { return }
+                await viewModel.loadNextArrivals(for: nearbyStations)
+            }
     }
 
     private var nearbyStations: [Station] {
