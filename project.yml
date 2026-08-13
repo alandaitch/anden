@@ -1,0 +1,88 @@
+name: Anden
+options:
+  bundleIdPrefix: com.alandaitch
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+settings:
+  base:
+    DEVELOPMENT_TEAM: 2TBBTAN27Z
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+targets:
+  Anden:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Anden
+      - path: Shared
+    dependencies:
+      - target: AndenWidget
+        embed: true
+    entitlements:
+      path: Anden/Anden.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.alandaitch.anden
+    info:
+      path: Anden/Info.plist
+      properties:
+        CFBundleDisplayName: Andén
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        NSLocationWhenInUseUsageDescription: "Andén usa tu ubicación para mostrarte las estaciones más cercanas y tu próximo tren."
+        NSLocationAlwaysAndWhenInUseUsageDescription: "Con acceso permanente, Andén puede avisarte de demoras de tu tren aunque no tengas la app abierta."
+        UIBackgroundModes:
+          - fetch
+          - processing
+          - location
+        BGTaskSchedulerPermittedIdentifiers:
+          - com.alandaitch.anden.refresh
+        NSSupportsLiveActivities: true
+        NSSupportsLiveActivitiesFrequentUpdates: true
+        ITSAppUsesNonExemptEncryption: false
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.alandaitch.anden
+        INFOPLIST_KEY_UIUserInterfaceStyle: Automatic
+        TARGETED_DEVICE_FAMILY: "1"
+        SUPPORTS_MACCATALYST: false
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+  AndenWidget:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Widget
+      - path: Shared
+    entitlements:
+      path: Widget/AndenWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.alandaitch.anden
+    info:
+      path: Widget/Info.plist
+      properties:
+        CFBundleDisplayName: Andén
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.alandaitch.anden.widget
+        TARGETED_DEVICE_FAMILY: "1"
+        SUPPORTS_MACCATALYST: false
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor

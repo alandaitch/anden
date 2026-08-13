@@ -1,0 +1,29 @@
+# Build outputs
+build/
+build-device/
+DerivedData/
+*.xcarchive
+
+# XcodeGen genera el proyecto desde project.yml
+Anden.xcodeproj/
+
+# Xcode user data
+xcuserdata/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+
+# Firmas y credenciales — NUNCA commitear
+*.mobileprovision
+*.p12
+*.pem
+*.cer
+*.certSigningRequest
+docs/token.dat
+*.dat
+
+# macOS
+.DS_Store
+
+# Python (scripts de research en docs/)
+__pycache__/
+*.pyc

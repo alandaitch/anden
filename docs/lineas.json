@@ -1,0 +1,775 @@
+[
+ {
+  "id": 1,
+  "nombre": "Sarmiento",
+  "colorHex": null,
+  "colorSugerido": null,
+  "colorNota": "La API no expone color de linea. No se encontro fuente oficial verificable (GTFS de Trenes Argentinos no trae route_color; el sitio oficial no publica hex por linea). Definir la paleta en la app como decision de diseno.",
+  "expuestaEnGerencias": true,
+  "estacionesEnApi": 46,
+  "ramales": [
+   {
+    "id": 1,
+    "nombre": "Once-Moreno",
+    "siglas": "OM",
+    "cabeceras": [
+     "Once",
+     "Moreno"
+    ],
+    "cabeceraInicialId": 293,
+    "cabeceraFinalId": 278,
+    "estaciones": 16,
+    "esElectrico": true,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Sarmiento / Once - Moreno"
+   },
+   {
+    "id": 53,
+    "nombre": "Merlo-Lobos",
+    "siglas": "HP",
+    "cabeceras": [
+     "Merlo",
+     "Lobos"
+    ],
+    "cabeceraInicialId": 269,
+    "cabeceraFinalId": 237,
+    "estaciones": 12,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Sarmiento / Merlo - Lobos"
+   },
+   {
+    "id": 51,
+    "nombre": "Moreno-Mercedes",
+    "siglas": "IP",
+    "cabeceras": [
+     "Moreno",
+     "Mercedes"
+    ],
+    "cabeceraInicialId": 278,
+    "cabeceraFinalId": 268,
+    "estaciones": 14,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 2,
+    "nombreGtfs": "Sarmiento / Moreno - Mercedes"
+   },
+   {
+    "id": 111,
+    "nombre": "Once-Bragado",
+    "siglas": "MP",
+    "cabeceras": [
+     "Once",
+     "Bragado"
+    ],
+    "cabeceraInicialId": 293,
+    "cabeceraFinalId": 46,
+    "estaciones": 23,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 959,
+    "tipoId": 3,
+    "nombreGtfs": null
+   }
+  ],
+  "ramalesNoListados": [
+   {
+    "id": 75,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 2,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   }
+  ]
+ },
+ {
+  "id": 5,
+  "nombre": "Mitre",
+  "colorHex": null,
+  "colorSugerido": null,
+  "colorNota": "La API no expone color de linea. No se encontro fuente oficial verificable (GTFS de Trenes Argentinos no trae route_color; el sitio oficial no publica hex por linea). Definir la paleta en la app como decision de diseno.",
+  "expuestaEnGerencias": true,
+  "estacionesEnApi": 56,
+  "ramales": [
+   {
+    "id": 5,
+    "nombre": "Retiro-Tigre",
+    "siglas": "AP",
+    "cabeceras": [
+     "Retiro (LGM)",
+     "Tigre"
+    ],
+    "cabeceraInicialId": 332,
+    "cabeceraFinalId": 389,
+    "estaciones": 17,
+    "esElectrico": true,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Mitre / Retiro - Tigre"
+   },
+   {
+    "id": 9,
+    "nombre": "Retiro-J.L. Suárez",
+    "siglas": "BP",
+    "cabeceras": [
+     "Retiro (LGM)",
+     "J.L. Suárez"
+    ],
+    "cabeceraInicialId": 332,
+    "cabeceraFinalId": 190,
+    "estaciones": 15,
+    "esElectrico": true,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Mitre / Retiro - J. L. Suárez"
+   },
+   {
+    "id": 7,
+    "nombre": "Retiro-Mitre",
+    "siglas": "CP",
+    "cabeceras": [
+     "Retiro (LGM)",
+     "Bmé. Mitre"
+    ],
+    "cabeceraInicialId": 332,
+    "cabeceraFinalId": 273,
+    "estaciones": 11,
+    "esElectrico": true,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Mitre / Retiro - Mitre"
+   },
+   {
+    "id": 35,
+    "nombre": "Villa Ballester-Zárate",
+    "siglas": "DP",
+    "cabeceras": [
+     "Villa Ballester",
+     "Zárate"
+    ],
+    "cabeceraInicialId": 412,
+    "cabeceraFinalId": 434,
+    "estaciones": 13,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Mitre / Villa Ballester - Zárate"
+   },
+   {
+    "id": 33,
+    "nombre": "Victoria-Capilla del Señor",
+    "siglas": "EP",
+    "cabeceras": [
+     "Victoria",
+     "Capilla del Señor"
+    ],
+    "cabeceraInicialId": 409,
+    "cabeceraFinalId": 61,
+    "estaciones": 11,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Mitre / Victoria - Capilla del Señor"
+   }
+  ],
+  "ramalesNoListados": [
+   {
+    "id": 141,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 28,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 151,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 40,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 171,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 28,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 505,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 31,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   }
+  ]
+ },
+ {
+  "id": 11,
+  "nombre": "Roca",
+  "colorHex": null,
+  "colorSugerido": null,
+  "colorNota": "La API no expone color de linea. No se encontro fuente oficial verificable (GTFS de Trenes Argentinos no trae route_color; el sitio oficial no publica hex por linea). Definir la paleta en la app como decision de diseno.",
+  "expuestaEnGerencias": true,
+  "estacionesEnApi": 94,
+  "ramales": [
+   {
+    "id": 17,
+    "nombre": "Constitución-Alejandro Korn",
+    "siglas": "AK",
+    "cabeceras": [
+     "Constitución",
+     "Alejandro Korn"
+    ],
+    "cabeceraInicialId": 93,
+    "cabeceraFinalId": 13,
+    "estaciones": 15,
+    "esElectrico": true,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Roca / Plaza Constitución - Alejandro Korn"
+   },
+   {
+    "id": 13,
+    "nombre": "Constitución-Bosques-Q",
+    "siglas": "BQ-Q",
+    "cabeceras": [
+     "Constitución",
+     "Bosques"
+    ],
+    "cabeceraInicialId": 93,
+    "cabeceraFinalId": 43,
+    "estaciones": 14,
+    "esElectrico": true,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Roca / Plaza Constitución - Bosques-Q"
+   },
+   {
+    "id": 15,
+    "nombre": "Constitución-Bosques-T",
+    "siglas": "BQ-T",
+    "cabeceras": [
+     "Constitución",
+     "Bosques"
+    ],
+    "cabeceraInicialId": 93,
+    "cabeceraFinalId": 43,
+    "estaciones": 12,
+    "esElectrico": true,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Roca / Plaza Constitución - Bosques-T"
+   },
+   {
+    "id": 19,
+    "nombre": "Constitución-Ezeiza",
+    "siglas": "ZZ",
+    "cabeceras": [
+     "Constitución",
+     "Ezeiza"
+    ],
+    "cabeceraInicialId": 93,
+    "cabeceraFinalId": 132,
+    "estaciones": 15,
+    "esElectrico": true,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Roca / Plaza Constitución - Ezeiza"
+   },
+   {
+    "id": 11,
+    "nombre": "Constitución-La Plata",
+    "siglas": "LP",
+    "cabeceras": [
+     "Constitución",
+     "La Plata"
+    ],
+    "cabeceraInicialId": 93,
+    "cabeceraFinalId": 217,
+    "estaciones": 19,
+    "esElectrico": true,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Roca / Plaza Constitución - La Plata"
+   },
+   {
+    "id": 57,
+    "nombre": "Constitución-Chascomus",
+    "siglas": "CHC",
+    "cabeceras": [
+     "Constitución",
+     "Chascomús"
+    ],
+    "cabeceraInicialId": 93,
+    "cabeceraFinalId": 78,
+    "estaciones": 12,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Roca / Plaza Constitución - Chascomús"
+   },
+   {
+    "id": 55,
+    "nombre": "Constitución-Lobos",
+    "siglas": "LB",
+    "cabeceras": [
+     "Constitución",
+     "Lobos"
+    ],
+    "cabeceraInicialId": 93,
+    "cabeceraFinalId": 237,
+    "estaciones": 13,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Roca / Plaza Constitución - Lobos"
+   },
+   {
+    "id": 49,
+    "nombre": "Constitución-Monte",
+    "siglas": "MON",
+    "cabeceras": [
+     "Constitución",
+     "Monte"
+    ],
+    "cabeceraInicialId": 93,
+    "cabeceraFinalId": 276,
+    "estaciones": 27,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Roca / Plaza Constitución - Monte"
+   },
+   {
+    "id": 37,
+    "nombre": "Ezeiza-Cañuelas",
+    "siglas": "ZZ-CÑ",
+    "cabeceras": [
+     "Temperley",
+     "Cañuelas"
+    ],
+    "cabeceraInicialId": 386,
+    "cabeceraFinalId": 60,
+    "estaciones": 13,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Roca / Ezeiza - Cañuelas (Eza)"
+   },
+   {
+    "id": 39,
+    "nombre": "La Plata - Htal. San Juan de Dios",
+    "siglas": "C25",
+    "cabeceras": [
+     "La Plata",
+     "Hospital San Juan de Dios"
+    ],
+    "cabeceraInicialId": 217,
+    "cabeceraFinalId": 5979,
+    "estaciones": 7,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 2,
+    "nombreGtfs": "Roca / La Plata - Policlínico"
+   },
+   {
+    "id": 29,
+    "nombre": "Temperley-Gutiérrez",
+    "siglas": "JG",
+    "cabeceras": [
+     "Remedios de Escalada",
+     "J. M. Gutiérrez"
+    ],
+    "cabeceraInicialId": 329,
+    "cabeceraFinalId": 168,
+    "estaciones": 10,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Roca / Temperley - Gutiérrez"
+   },
+   {
+    "id": 27,
+    "nombre": "Temperley-Haedo",
+    "siglas": "TY-HD",
+    "cabeceras": [
+     "Remedios de Escalada",
+     "Haedo"
+    ],
+    "cabeceraInicialId": 329,
+    "cabeceraFinalId": 169,
+    "estaciones": 11,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Roca / Temperley - Haedo"
+   }
+  ],
+  "ramalesNoListados": [
+   {
+    "id": 43,
+    "nombre": null,
+    "nombreGtfs": "Roca / Plaza Constitución - Cañuelas (Pza)",
+    "estacionesConocidas": 24,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 76,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 12,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 101,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 21,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 103,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 21,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 105,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 21,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 181,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 28,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 601,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 28,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 603,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 34,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 605,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 21,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 607,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 35,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 609,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 19,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   }
+  ]
+ },
+ {
+  "id": 21,
+  "nombre": "Belgrano Sur",
+  "colorHex": null,
+  "colorSugerido": null,
+  "colorNota": "La API no expone color de linea. No se encontro fuente oficial verificable (GTFS de Trenes Argentinos no trae route_color; el sitio oficial no publica hex por linea). Definir la paleta en la app como decision de diseno.",
+  "expuestaEnGerencias": true,
+  "estacionesEnApi": 26,
+  "ramales": [
+   {
+    "id": 25,
+    "nombre": "Buenos Aires-Gonzalez Catán",
+    "siglas": "BAGC",
+    "cabeceras": [
+     "Buenos Aires",
+     "González Catán"
+    ],
+    "cabeceraInicialId": 48,
+    "cabeceraFinalId": 154,
+    "estaciones": 14,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Belgrano Sur / Buenos Aires - Gonzalez Catán"
+   },
+   {
+    "id": 21,
+    "nombre": "Buenos Aires-M.C.G. Belgrano",
+    "siglas": "BAB",
+    "cabeceras": [
+     "Buenos Aires",
+     "Marinos C. G Belgrano"
+    ],
+    "cabeceraInicialId": 48,
+    "cabeceraFinalId": 259,
+    "estaciones": 17,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Belgrano Sur / Buenos Aires - M.C.G. Belgrano"
+   },
+   {
+    "id": 67,
+    "nombre": "González Catan -Navarro",
+    "siglas": "GCJU",
+    "cabeceras": [
+     "González Catán",
+     "Navarro"
+    ],
+    "cabeceraInicialId": 154,
+    "cabeceraFinalId": 6001,
+    "estaciones": 7,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 2,
+    "nombreGtfs": "Belgrano Sur / Gonzalez Catán - 20 de Junio"
+   }
+  ],
+  "ramalesNoListados": [
+   {
+    "id": 23,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 10,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 63,
+    "nombre": null,
+    "nombreGtfs": "Belgrano Sur / Apeadero Km 12 - Libertad",
+    "estacionesConocidas": 16,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 73,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 18,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   }
+  ]
+ },
+ {
+  "id": 31,
+  "nombre": "San Martín",
+  "colorHex": null,
+  "colorSugerido": null,
+  "colorNota": "La API no expone color de linea. No se encontro fuente oficial verificable (GTFS de Trenes Argentinos no trae route_color; el sitio oficial no publica hex por linea). Definir la paleta en la app como decision de diseno.",
+  "expuestaEnGerencias": true,
+  "estacionesEnApi": 32,
+  "ramales": [
+   {
+    "id": 131,
+    "nombre": "Retiro - Junín",
+    "siglas": "RRF",
+    "cabeceras": [
+     "Retiro (LSM)",
+     "Junin"
+    ],
+    "cabeceraInicialId": 463,
+    "cabeceraFinalId": 202,
+    "estaciones": 10,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 1259,
+    "tipoId": 3,
+    "nombreGtfs": null
+   },
+   {
+    "id": 65,
+    "nombre": "Retiro-Cabred",
+    "siglas": "RC",
+    "cabeceras": [
+     "Retiro (LSM)",
+     "Dr. Cabred"
+    ],
+    "cabeceraInicialId": 463,
+    "cabeceraFinalId": 51,
+    "estaciones": 22,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "San Martín / Retiro (LSM) - Cabred"
+   }
+  ],
+  "ramalesNoListados": [
+   {
+    "id": 31,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 20,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   },
+   {
+    "id": 59,
+    "nombre": null,
+    "nombreGtfs": null,
+    "estacionesConocidas": 3,
+    "gerenciaInferida": true,
+    "nota": "Aparece en incluida_en_ramales de estaciones. NO lo lista /infraestructura/ramales."
+   }
+  ]
+ },
+ {
+  "id": 41,
+  "nombre": "Tren de la Costa",
+  "colorHex": null,
+  "colorSugerido": null,
+  "colorNota": "La API no expone color de linea. No se encontro fuente oficial verificable (GTFS de Trenes Argentinos no trae route_color; el sitio oficial no publica hex por linea). Definir la paleta en la app como decision de diseno.",
+  "expuestaEnGerencias": true,
+  "estacionesEnApi": 11,
+  "ramales": [
+   {
+    "id": 41,
+    "nombre": "Maipú-Delta",
+    "siglas": "MD",
+    "cabeceras": [
+     "Maipú",
+     "Delta"
+    ],
+    "cabeceraInicialId": 248,
+    "cabeceraFinalId": 104,
+    "estaciones": 11,
+    "esElectrico": true,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": "Tren de la Costa / Maipú - Delta"
+   }
+  ],
+  "ramalesNoListados": []
+ },
+ {
+  "id": 61,
+  "nombre": "Belgrano Norte",
+  "colorHex": null,
+  "colorSugerido": null,
+  "colorNota": "La API no expone color de linea. No se encontro fuente oficial verificable (GTFS de Trenes Argentinos no trae route_color; el sitio oficial no publica hex por linea). Definir la paleta en la app como decision de diseno.",
+  "expuestaEnGerencias": false,
+  "estacionesEnApi": 0,
+  "ramales": [
+   {
+    "id": 61,
+    "nombre": "Retiro-Villa Rosa",
+    "siglas": "RVR",
+    "cabeceras": [
+     "Retiro (LBN)",
+     "Villa Rosa"
+    ],
+    "cabeceraInicialId": 489,
+    "cabeceraFinalId": 426,
+    "estaciones": 22,
+    "esElectrico": false,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 1,
+    "nombreGtfs": null
+   }
+  ],
+  "ramalesNoListados": []
+ },
+ {
+  "id": 71,
+  "nombre": "Urquiza",
+  "colorHex": null,
+  "colorSugerido": null,
+  "colorNota": "La API no expone color de linea. No se encontro fuente oficial verificable (GTFS de Trenes Argentinos no trae route_color; el sitio oficial no publica hex por linea). Definir la paleta en la app como decision de diseno.",
+  "expuestaEnGerencias": false,
+  "estacionesEnApi": 0,
+  "ramales": [
+   {
+    "id": 71,
+    "nombre": "Lacroze-Lemos",
+    "siglas": "LL",
+    "cabeceras": [
+     "Federico Lacroze",
+     "General Lemos"
+    ],
+    "cabeceraInicialId": 135,
+    "cabeceraFinalId": 149,
+    "estaciones": 23,
+    "esElectrico": true,
+    "operativo": true,
+    "toleranciaPuntualidadSegundos": 359,
+    "tipoId": 2,
+    "nombreGtfs": null
+   }
+  ],
+  "ramalesNoListados": []
+ },
+ {
+  "id": 501,
+  "nombre": "Regionales",
+  "colorHex": null,
+  "colorSugerido": null,
+  "colorNota": "La API no expone color de linea. No se encontro fuente oficial verificable (GTFS de Trenes Argentinos no trae route_color; el sitio oficial no publica hex por linea). Definir la paleta en la app como decision de diseno.",
+  "expuestaEnGerencias": true,
+  "estacionesEnApi": 0,
+  "ramales": [],
+  "ramalesNoListados": []
+ }
+]
