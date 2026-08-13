@@ -1,0 +1,786 @@
+[
+ {
+  "name": "Acoyte",
+  "line": "LineaA",
+  "lat": -34.618279,
+  "lng": -58.43643
+ },
+ {
+  "name": "Alberti",
+  "line": "LineaA",
+  "lat": -34.609833,
+  "lng": -58.40121
+ },
+ {
+  "name": "Carabobo",
+  "line": "LineaA",
+  "lat": -34.626666,
+  "lng": -58.45671
+ },
+ {
+  "name": "Castro Barros",
+  "line": "LineaA",
+  "lat": -34.611769,
+  "lng": -58.421818
+ },
+ {
+  "name": "Congreso",
+  "line": "LineaA",
+  "lat": -34.609225,
+  "lng": -58.392672,
+  "aliases": [
+   "Congreso - Pdte. Dr. Raúl Alfonsín"
+  ]
+ },
+ {
+  "name": "Lima",
+  "line": "LineaA",
+  "lat": -34.609099,
+  "lng": -58.382236
+ },
+ {
+  "name": "Loria",
+  "line": "LineaA",
+  "lat": -34.610781,
+  "lng": -58.415188
+ },
+ {
+  "name": "Pasco",
+  "line": "LineaA",
+  "lat": -34.609645,
+  "lng": -58.39843
+ },
+ {
+  "name": "Perú",
+  "line": "LineaA",
+  "lat": -34.608558,
+  "lng": -58.374272,
+  "aliases": [
+   "Peru"
+  ]
+ },
+ {
+  "name": "Piedras",
+  "line": "LineaA",
+  "lat": -34.608881,
+  "lng": -58.379089
+ },
+ {
+  "name": "Plaza de Mayo",
+  "line": "LineaA",
+  "lat": -34.608809,
+  "lng": -58.370973,
+  "aliases": [
+   "Plaza De Mayo"
+  ]
+ },
+ {
+  "name": "Plaza Miserere",
+  "line": "LineaA",
+  "lat": -34.609816,
+  "lng": -58.40671,
+  "aliases": [
+   "Plaza De Miserere"
+  ]
+ },
+ {
+  "name": "Primera Junta",
+  "line": "LineaA",
+  "lat": -34.620404,
+  "lng": -58.441179
+ },
+ {
+  "name": "Puán",
+  "line": "LineaA",
+  "lat": -34.623528,
+  "lng": -58.448648,
+  "aliases": [
+   "Puan"
+  ]
+ },
+ {
+  "name": "Río de Janeiro",
+  "line": "LineaA",
+  "lat": -34.615205,
+  "lng": -58.429502,
+  "aliases": [
+   "Rio De Janeiro"
+  ]
+ },
+ {
+  "name": "Sáenz Peña",
+  "line": "LineaA",
+  "lat": -34.609412,
+  "lng": -58.386781,
+  "aliases": [
+   "Saenz Peña"
+  ]
+ },
+ {
+  "name": "San José de Flores",
+  "line": "LineaA",
+  "lat": -34.629086,
+  "lng": -58.463541,
+  "aliases": [
+   "San José De Flores"
+  ]
+ },
+ {
+  "name": "San Pedrito",
+  "line": "LineaA",
+  "lat": -34.630706,
+  "lng": -58.46964
+ },
+ {
+  "name": "Ángel Gallardo",
+  "line": "LineaB",
+  "lat": -34.602162,
+  "lng": -58.431276,
+  "aliases": [
+   "Angel Gallardo"
+  ]
+ },
+ {
+  "name": "Callao",
+  "line": "LineaB",
+  "lat": -34.604419,
+  "lng": -58.392318,
+  "aliases": [
+   "Callao - Maestro Alfredo Bravo"
+  ]
+ },
+ {
+  "name": "Carlos Gardel",
+  "line": "LineaB",
+  "lat": -34.604079,
+  "lng": -58.411765
+ },
+ {
+  "name": "Carlos Pellegrini",
+  "line": "LineaB",
+  "lat": -34.603636,
+  "lng": -58.380719,
+  "aliases": [
+   "C. Pellegrini",
+   "Carlos Pelegrini"
+  ]
+ },
+ {
+  "name": "De Los Incas - Parque Chas",
+  "line": "LineaB",
+  "lat": -34.581249,
+  "lng": -58.474241,
+  "aliases": [
+   "De Los Incas",
+   "De Los Incas - Pque. Chas"
+  ]
+ },
+ {
+  "name": "Dorrego",
+  "line": "LineaB",
+  "lat": -34.591718,
+  "lng": -58.447574
+ },
+ {
+  "name": "Echeverría",
+  "line": "LineaB",
+  "lat": -34.577798,
+  "lng": -58.481013,
+  "aliases": [
+   "Echeverría - Mártires Palotinos"
+  ]
+ },
+ {
+  "name": "Federico Lacroze",
+  "line": "LineaB",
+  "lat": -34.587198,
+  "lng": -58.45503
+ },
+ {
+  "name": "Florida",
+  "line": "LineaB",
+  "lat": -34.603296,
+  "lng": -58.375076
+ },
+ {
+  "name": "Juan Manuel de Rosas",
+  "line": "LineaB",
+  "lat": -34.574319,
+  "lng": -58.486385,
+  "aliases": [
+   "Juan Manuel De Rosas",
+   "Juan Manuel De Rosas - Villa Urquiza"
+  ]
+ },
+ {
+  "name": "Leandro N. Alem",
+  "line": "LineaB",
+  "lat": -34.602989,
+  "lng": -58.369934
+ },
+ {
+  "name": "Malabia",
+  "line": "LineaB",
+  "lat": -34.598967,
+  "lng": -58.439773,
+  "aliases": [
+   "Malabia - Osvaldo Pugliese"
+  ]
+ },
+ {
+  "name": "Medrano",
+  "line": "LineaB",
+  "lat": -34.603164,
+  "lng": -58.420965,
+  "aliases": [
+   "Almagro",
+   "Almagro - Medrano"
+  ]
+ },
+ {
+  "name": "Pasteur",
+  "line": "LineaB",
+  "lat": -34.604642,
+  "lng": -58.399477,
+  "aliases": [
+   "Pasteur - Amia"
+  ]
+ },
+ {
+  "name": "Pueyrredón",
+  "line": "LineaB",
+  "lat": -34.60458,
+  "lng": -58.405402,
+  "aliases": [
+   "Pueyrredon"
+  ]
+ },
+ {
+  "name": "Tronador - Villa Ortúzar",
+  "line": "LineaB",
+  "lat": -34.584095,
+  "lng": -58.466228,
+  "aliases": [
+   "Tronador"
+  ]
+ },
+ {
+  "name": "Uruguay",
+  "line": "LineaB",
+  "lat": -34.604093,
+  "lng": -58.3873
+ },
+ {
+  "name": "Avenida de Mayo",
+  "line": "LineaC",
+  "lat": -34.608982,
+  "lng": -58.380615,
+  "aliases": [
+   "Av. De Mayo"
+  ]
+ },
+ {
+  "name": "Constitucion",
+  "line": "LineaC",
+  "lat": -34.627618,
+  "lng": -58.381438
+ },
+ {
+  "name": "Diagonal Norte",
+  "line": "LineaC",
+  "lat": -34.604843,
+  "lng": -58.379534
+ },
+ {
+  "name": "General San Martin",
+  "line": "LineaC",
+  "lat": -34.595057,
+  "lng": -58.377823,
+  "aliases": [
+   "San Martin"
+  ]
+ },
+ {
+  "name": "Independencia",
+  "line": "LineaC",
+  "lat": -34.618124,
+  "lng": -58.380177
+ },
+ {
+  "name": "Lavalle",
+  "line": "LineaC",
+  "lat": -34.601769,
+  "lng": -58.37816
+ },
+ {
+  "name": "Moreno",
+  "line": "LineaC",
+  "lat": -34.612616,
+  "lng": -58.380448
+ },
+ {
+  "name": "Retiro",
+  "line": "LineaC",
+  "lat": -34.591193,
+  "lng": -58.374022
+ },
+ {
+  "name": "San Juan",
+  "line": "LineaC",
+  "lat": -34.621915,
+  "lng": -58.379925
+ },
+ {
+  "name": "9 de Julio",
+  "line": "LineaD",
+  "lat": -34.604244,
+  "lng": -58.380578,
+  "aliases": [
+   "9 De Julio"
+  ]
+ },
+ {
+  "name": "Agüero",
+  "line": "LineaD",
+  "lat": -34.591627,
+  "lng": -58.407164
+ },
+ {
+  "name": "Bulnes",
+  "line": "LineaD",
+  "lat": -34.588237,
+  "lng": -58.411297
+ },
+ {
+  "name": "Callao",
+  "line": "LineaD",
+  "lat": -34.599639,
+  "lng": -58.393129
+ },
+ {
+  "name": "Catedral",
+  "line": "LineaD",
+  "lat": -34.607801,
+  "lng": -58.37396
+ },
+ {
+  "name": "Congreso de Tucumán",
+  "line": "LineaD",
+  "lat": -34.555642,
+  "lng": -58.462379,
+  "aliases": [
+   "Congreso De Tucuman"
+  ]
+ },
+ {
+  "name": "Facultad de Medicina",
+  "line": "LineaD",
+  "lat": -34.599756,
+  "lng": -58.397927,
+  "aliases": [
+   "Facultad De Medicina"
+  ]
+ },
+ {
+  "name": "José Hernández",
+  "line": "LineaD",
+  "lat": -34.566216,
+  "lng": -58.452127,
+  "aliases": [
+   "Jose Hernandez"
+  ]
+ },
+ {
+  "name": "Juramento",
+  "line": "LineaD",
+  "lat": -34.56231,
+  "lng": -58.45649
+ },
+ {
+  "name": "Ministro Carranza",
+  "line": "LineaD",
+  "lat": -34.575178,
+  "lng": -58.435015,
+  "aliases": [
+   "Ministro Carranza - Miguel Abuelo"
+  ]
+ },
+ {
+  "name": "Olleros",
+  "line": "LineaD",
+  "lat": -34.570013,
+  "lng": -58.44467
+ },
+ {
+  "name": "Palermo",
+  "line": "LineaD",
+  "lat": -34.578422,
+  "lng": -58.425714
+ },
+ {
+  "name": "Plaza Italia",
+  "line": "LineaD",
+  "lat": -34.581411,
+  "lng": -58.421198
+ },
+ {
+  "name": "Pueyrredón",
+  "line": "LineaD",
+  "lat": -34.594425,
+  "lng": -58.402398,
+  "aliases": [
+   "Pueyrredon"
+  ]
+ },
+ {
+  "name": "Scalabrini Ortíz",
+  "line": "LineaD",
+  "lat": -34.585156,
+  "lng": -58.415958,
+  "aliases": [
+   "R.Scalabrini Ortiz"
+  ]
+ },
+ {
+  "name": "Tribunales",
+  "line": "LineaD",
+  "lat": -34.601586,
+  "lng": -58.385146,
+  "aliases": [
+   "Tribunales - Teatro Colón"
+  ]
+ },
+ {
+  "name": "Av. La Plata",
+  "line": "LineaE",
+  "lat": -34.627014,
+  "lng": -58.426791,
+  "aliases": [
+   "La Plata"
+  ]
+ },
+ {
+  "name": "Belgrano",
+  "line": "LineaE",
+  "lat": -34.612848,
+  "lng": -58.377585
+ },
+ {
+  "name": "Boedo",
+  "line": "LineaE",
+  "lat": -34.625365,
+  "lng": -58.415535
+ },
+ {
+  "name": "Bolivar",
+  "line": "LineaE",
+  "lat": -34.609241,
+  "lng": -58.373688
+ },
+ {
+  "name": "Catalinas",
+  "line": "LineaE",
+  "lat": -34.596623,
+  "lng": -58.371669
+ },
+ {
+  "name": "Correo Central",
+  "line": "LineaE",
+  "lat": -34.603111,
+  "lng": -58.370561
+ },
+ {
+  "name": "Emilio Mitre",
+  "line": "LineaE",
+  "lat": -34.631041,
+  "lng": -58.442172
+ },
+ {
+  "name": "Entre Ríos",
+  "line": "LineaE",
+  "lat": -34.622718,
+  "lng": -58.391515,
+  "aliases": [
+   "Entre Rios",
+   "Entre Rios - Rodolfo Walsh"
+  ]
+ },
+ {
+  "name": "General Urquiza",
+  "line": "LineaE",
+  "lat": -34.624653,
+  "lng": -58.409393,
+  "aliases": [
+   "Urquiza"
+  ]
+ },
+ {
+  "name": "Independencia",
+  "line": "LineaE",
+  "lat": -34.617936,
+  "lng": -58.381539,
+  "aliases": [
+   "Independencia - Beata Mama Antula"
+  ]
+ },
+ {
+  "name": "Jose Maria Moreno",
+  "line": "LineaE",
+  "lat": -34.628016,
+  "lng": -58.433818,
+  "aliases": [
+   "Moreno"
+  ]
+ },
+ {
+  "name": "Jujuy",
+  "line": "LineaE",
+  "lat": -34.623865,
+  "lng": -58.402939
+ },
+ {
+  "name": "Medalla Milagrosa",
+  "line": "LineaE",
+  "lat": -34.636388,
+  "lng": -58.450279
+ },
+ {
+  "name": "Pichincha",
+  "line": "LineaE",
+  "lat": -34.623109,
+  "lng": -58.397071
+ },
+ {
+  "name": "Plaza de los Virreyes",
+  "line": "LineaE",
+  "lat": -34.643311,
+  "lng": -58.461652,
+  "aliases": [
+   "Plaza De Los Virreyes",
+   "Plaza De Los Virreyes - Eva Perón"
+  ]
+ },
+ {
+  "name": "Retiro",
+  "line": "LineaE",
+  "lat": -34.592177,
+  "lng": -58.375725
+ },
+ {
+  "name": "San José",
+  "line": "LineaE",
+  "lat": -34.622338,
+  "lng": -58.385152,
+  "aliases": [
+   "San Jose"
+  ]
+ },
+ {
+  "name": "Varela",
+  "line": "LineaE",
+  "lat": -34.640136,
+  "lng": -58.457892
+ },
+ {
+  "name": "Caseros",
+  "line": "LineaH",
+  "lat": -34.635749,
+  "lng": -58.39893
+ },
+ {
+  "name": "Cordoba",
+  "line": "LineaH",
+  "lat": -34.598454,
+  "lng": -58.403724,
+  "aliases": [
+   "Córdoba"
+  ]
+ },
+ {
+  "name": "Corrientes",
+  "line": "LineaH",
+  "lat": -34.604489,
+  "lng": -58.405453
+ },
+ {
+  "name": "Facultad de Derecho",
+  "line": "LineaH",
+  "lat": -34.583036,
+  "lng": -58.391022,
+  "aliases": [
+   "Facultad De Derecho",
+   "Facultad De Derecho - Julieta Lanteri"
+  ]
+ },
+ {
+  "name": "Hospitales",
+  "line": "LineaH",
+  "lat": -34.641267,
+  "lng": -58.412387,
+  "aliases": [
+   "Hospitales - Ringo Bonavena"
+  ]
+ },
+ {
+  "name": "Humberto 1",
+  "line": "LineaH",
+  "lat": -34.623091,
+  "lng": -58.402325,
+  "aliases": [
+   "Humberto 1°"
+  ]
+ },
+ {
+  "name": "Inclan",
+  "line": "LineaH",
+  "lat": -34.629374,
+  "lng": -58.400972,
+  "aliases": [
+   "Inclan - Mezquita Al Ahmad"
+  ]
+ },
+ {
+  "name": "Las Heras",
+  "line": "LineaH",
+  "lat": -34.587461,
+  "lng": -58.397219
+ },
+ {
+  "name": "Once",
+  "line": "LineaH",
+  "lat": -34.608934,
+  "lng": -58.406039,
+  "aliases": [
+   "Once - 30 De Diciembre"
+  ]
+ },
+ {
+  "name": "Parque Patricios",
+  "line": "LineaH",
+  "lat": -34.638404,
+  "lng": -58.405797
+ },
+ {
+  "name": "Santa Fe",
+  "line": "LineaH",
+  "lat": -34.594385,
+  "lng": -58.402326,
+  "aliases": [
+   "Santa Fe - Carlos Jauregui"
+  ]
+ },
+ {
+  "name": "Venezuela",
+  "line": "LineaH",
+  "lat": -34.615241,
+  "lng": -58.404734
+ },
+ {
+  "name": "Ana Diaz",
+  "line": "Premetro",
+  "lat": -34.680578,
+  "lng": -58.466878
+ },
+ {
+  "name": "Ana Maria Janer",
+  "line": "Premetro",
+  "lat": -34.659486,
+  "lng": -58.450008
+ },
+ {
+  "name": "Balbastro",
+  "line": "Premetro",
+  "lat": -34.649266,
+  "lng": -58.45564
+ },
+ {
+  "name": "Cecilia Grierson",
+  "line": "Premetro",
+  "lat": -34.672189,
+  "lng": -58.457543
+ },
+ {
+  "name": "Centro Civico",
+  "line": "Premetro",
+  "lat": -34.683539,
+  "lng": -58.465152
+ },
+ {
+  "name": "Escalada",
+  "line": "Premetro",
+  "lat": -34.674559,
+  "lng": -58.460167
+ },
+ {
+  "name": "Fernandez de la Cruz",
+  "line": "Premetro",
+  "lat": -34.662235,
+  "lng": -58.446598
+ },
+ {
+  "name": "Gabino Ezeiza",
+  "line": "Premetro",
+  "lat": -34.685968,
+  "lng": -58.458103
+ },
+ {
+  "name": "General Savio",
+  "line": "Premetro",
+  "lat": -34.689597,
+  "lng": -58.460817
+ },
+ {
+  "name": "Intendente Saguier",
+  "line": "Premetro",
+  "lat": -34.643259,
+  "lng": -58.461525
+ },
+ {
+  "name": "Larrazabal",
+  "line": "Premetro",
+  "lat": -34.680602,
+  "lng": -58.465343
+ },
+ {
+  "name": "Mariano Acosta",
+  "line": "Premetro",
+  "lat": -34.654438,
+  "lng": -58.456493
+ },
+ {
+  "name": "Nicolas Descalzi",
+  "line": "Premetro",
+  "lat": -34.682799,
+  "lng": -58.462344
+ },
+ {
+  "name": "Ntra. Sra. de Fatima",
+  "line": "Premetro",
+  "lat": -34.660448,
+  "lng": -58.448783
+ },
+ {
+  "name": "Parque de la Ciudad",
+  "line": "Premetro",
+  "lat": -34.669865,
+  "lng": -58.455109
+ },
+ {
+  "name": "Pola",
+  "line": "Premetro",
+  "lat": -34.678111,
+  "lng": -58.464412
+ },
+ {
+  "name": "Presidente Illia",
+  "line": "Premetro",
+  "lat": -34.665177,
+  "lng": -58.448533
+ },
+ {
+  "name": "Somellera",
+  "line": "Premetro",
+  "lat": -34.656449,
+  "lng": -58.453907
+ }
+]

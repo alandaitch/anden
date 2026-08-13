@@ -1,0 +1,25 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- rieles en perspectiva -->
+    <path
+        android:fillColor="#E9EEF7"
+        android:pathData="M49,92 L52,92 L55,46 L53,46 Z" />
+    <path
+        android:fillColor="#E9EEF7"
+        android:pathData="M59,92 L56,92 L53,46 L55,46 Z" />
+    <!-- durmientes -->
+    <path android:fillColor="#8B96AD" android:pathData="M44,86 L64,86 L64,88 L44,88 Z" />
+    <path android:fillColor="#8B96AD" android:pathData="M46,76 L62,76 L62,78 L46,78 Z" />
+    <path android:fillColor="#8B96AD" android:pathData="M48,66 L60,66 L60,68 L48,68 Z" />
+    <path android:fillColor="#8B96AD" android:pathData="M49,58 L59,58 L59,60 L49,60 Z" />
+    <!-- luz de señal verde -->
+    <path
+        android:fillColor="#2FD180"
+        android:pathData="M54,44 m-11,0 a11,11 0 1,0 22,0 a11,11 0 1,0 -22,0" />
+    <path
+        android:fillColor="#EAFFF4"
+        android:pathData="M50,40 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+</vector>

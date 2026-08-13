@@ -1,0 +1,11 @@
+.gradle/
+build/
+/local.properties
+*.keystore
+*.jks
+.idea/
+*.iml
+captures/
+
+# APK va a Releases, no al repo
+*.apk

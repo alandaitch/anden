@@ -1,0 +1,14 @@
+# Copiá este archivo a local.properties (NO se commitea) y completá:
+sdk.dir=/Users/TU_USUARIO/Library/Android/sdk
+
+# Key gratis de la API de Transporte de la Ciudad (api-transporte.buenosaires.gob.ar).
+# Sin esto, Subte/Bici/Colectivos muestran "configurá la API"; el tren anda igual.
+BA_CLIENT_ID=
+BA_CLIENT_SECRET=
+
+# Firma del APK de release (opcional; para debug no hace falta).
+# Generá el keystore con:
+#   keytool -genkeypair -keystore anden-release.keystore -alias anden -keyalg RSA -keysize 2048 -validity 10000
+KEYSTORE_PASSWORD=
+KEY_ALIAS=anden
+KEY_PASSWORD=

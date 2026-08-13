@@ -2,7 +2,7 @@
   <img src="docs/icon.png" width="128" height="128" alt="Andén" />
   <h1>Andén</h1>
   <p><b>Tu tren, en vivo.</b> Arribos en tiempo real de los trenes del AMBA (Buenos Aires).</p>
-  <p>App iOS nativa · SwiftUI · iOS 17+</p>
+  <p>App nativa · iOS (SwiftUI) + Android (Kotlin/Compose)</p>
 </div>
 
 ---
@@ -29,11 +29,23 @@ Andén no está en la App Store. iOS no permite "bajá el archivo y tocá instal
 
 Igual que arriba pero con **[SideStore](https://sidestore.io)**. Requiere un pairing inicial, después renueva por Wi-Fi.
 
-### Notas honestas
+### Notas honestas (iPhone)
 
 - Es **tu** Apple ID: nadie ve tus datos. No hace falta jailbreak.
 - Con Apple ID gratis, la app **se renueva cada 7 días** (AltStore/SideStore lo hacen solo si están activos). Con cuenta de pago dura 1 año.
 - Alternativa para devs: cloná el repo y compilá con Xcode (ver [Compilar](#compilar)).
+
+### Android — instalá el APK directo
+
+En Android es más simple: bajás el APK y lo instalás.
+
+➡️ **[Descargá `Anden-android.apk` acá](https://github.com/alandaitch/anden/releases/latest)**
+
+1. Abrí `Anden-android.apk` en tu teléfono.
+2. Si te pide, permití **instalar apps de esta fuente** (Ajustes → apps desconocidas).
+3. Instalá y listo. No caduca.
+
+App nativa (Kotlin + Jetpack Compose + osmdroid). Código en [`android/`](android/).
 
 ## Funciones
 
