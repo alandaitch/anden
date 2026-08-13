@@ -7,6 +7,7 @@ enum APIError: Error, LocalizedError {
     case decoding(Error)
     case transport(Error)
     case noToken
+    case serviceUnavailable(message: String?)
 
     var errorDescription: String? {
         switch self {
@@ -16,9 +17,13 @@ enum APIError: Error, LocalizedError {
         case .decoding:                 return "No se pudo leer la respuesta."
         case .transport:                return "Sin conexión con el servidor."
         case .noToken:                  return "No hay token disponible."
+        case .serviceUnavailable(let m): return m ?? "Servicio no disponible."
         }
     }
 }
+
+// Alias para el cliente de la API BA. Comparte los casos de APIError.
+typealias BAError = APIError
 
 // Parseo de fechas de la API. Dos esquemas: ISO UTC (con Z) y alertas (local, sin Z).
 enum SofseDate {

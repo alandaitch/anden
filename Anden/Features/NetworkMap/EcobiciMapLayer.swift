@@ -28,12 +28,10 @@ enum EcobiciMapLayer {
     ) -> some MapContent {
         ForEach(stations) { station in
             Annotation(station.displayName, coordinate: station.coordinate, anchor: .center) {
-                Button {
-                    onSelect(station)
-                } label: {
-                    EcobiciMapPin(station: station)
-                }
-                .buttonStyle(.plain)
+                EcobiciMapPin(station: station)
+                    .frame(width: 34, height: 34)
+                    .contentShape(Circle())
+                    .onTapGesture { onSelect(station) }
             }
         }
     }

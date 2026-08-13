@@ -40,6 +40,16 @@ struct StationBoardView: View {
                     .foregroundStyle(Palette.textPrimary)
             }
             ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    MapsOpener.walk(to: station.coordinate, name: station.nombre)
+                } label: {
+                    Image(systemName: "figure.walk")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(Palette.textSecondary)
+                }
+                .accessibilityLabel("Cómo llegar a la estación")
+            }
+            ToolbarItem(placement: .topBarTrailing) {
                 favoriteButton
             }
         }

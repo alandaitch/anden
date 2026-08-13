@@ -160,9 +160,76 @@ actor BAClient {
         return out
     }
 
+    // MARK: - Colectivos: posiciones GPS en vivo
+
+    // Todos los colectivos con GPS (protobuf, sin json). Decodifica con GTFSRealtime.
+    // Si 'near' está dado, ordena por cercanía y corta a maxCount (perf del mapa).
+    func colectivoPositions(near: CLLocationCoordinate2D? = nil, maxCount: Int = 500) async throws -> [BusPosition] {
+        let data = try await get(path: "colectivos/vehiclePositions", flags: [:], accept: "application/x-protobuf")
+        var positions = parseVehiclePositions(data)
+        if let near {
+            let cosLat = cos(near.latitude * .pi / 180)
+            func approx(_ p: BusPosition) -> Double {
+                let dLat = p.coordinate.latitude - near.latitude
+                let dLng = (p.coordinate.longitude - near.longitude) * cosLat
+                return dLat * dLat + dLng * dLng
+            }
+            positions.sort { approx($0) < approx($1) }
+        }
+        if positions.count > maxCount { positions = Array(positions.prefix(maxCount)) }
+        return positions
+    }
+
+    // MARK: - Colectivos: arribos por parada ("cuándo llega")
+
+    // Pronóstico de una parada. OJO: hoy el backend SOAP de BA devuelve 503.
+    // Detecta 503 o JSON-de-error y tira BAError.serviceUnavailable con mensaje claro.
+    func colectivoArrivals(stopCode: String) async throws -> [BusArrival] {
+        let data: Data
+        do {
+            data = try await get(path: "colectivos/forecastGTFS", flags: ["StopCode": stopCode, "json": "1"])
+        } catch let APIError.http(status, _) where status == 503 {
+            throw APIError.serviceUnavailable(message: Self.colectivoDownMessage)
+        }
+        // El backend a veces responde 200 con un cuerpo de error JSON.
+        if let env = try? decoder.decode(BAErrorEnvelope.self, from: data), env.error != nil {
+            throw APIError.serviceUnavailable(message: Self.colectivoDownMessage)
+        }
+        let resp = try decode(ForecastResponse.self, data)
+        let now = Date()
+
+        var out: [BusArrival] = []
+        for entity in resp.Entity ?? [] {
+            guard let linea = entity.Linea else { continue }
+            let stops = linea.Estaciones ?? []
+            let stop = stops.first(where: { $0.stop_id == stopCode }) ?? stops.first
+            guard let stop, let epoch = stop.arrival?.time else { continue }
+            let eta = Date(timeIntervalSince1970: TimeInterval(epoch))
+            let secondsUntil = Int(eta.timeIntervalSince(now).rounded())
+            if secondsUntil < 0 { continue }
+
+            let lineName = ColectivoCatalog.shared.displayLine(routeId: linea.Route_Id ?? "")
+            let destino = stops.last?.stop_name
+            let delaySeconds = stop.arrival?.delay ?? 0
+            let scheduled = eta.addingTimeInterval(TimeInterval(-delaySeconds))
+            let delay = DelayLogic.status(scheduled: scheduled, estimated: eta, tolerance: subteTolerance)
+            out.append(BusArrival(
+                lineName: lineName,
+                destino: destino,
+                eta: eta,
+                secondsUntil: secondsUntil,
+                delay: delay
+            ))
+        }
+        return out.sorted { $0.secondsUntil < $1.secondsUntil }
+    }
+
+    private static let colectivoDownMessage =
+        "El servicio de arribos de colectivos de la Ciudad no está disponible ahora. Probá más tarde."
+
     // MARK: - Red
 
-    private func get(path: String, flags: [String: String]) async throws -> Data {
+    private func get(path: String, flags: [String: String], accept: String = "application/json") async throws -> Data {
         guard BASecrets.isConfigured else { throw APIError.noToken }
 
         var comps = URLComponents(url: base.appendingPathComponent(path), resolvingAgainstBaseURL: false)
@@ -175,7 +242,7 @@ actor BAClient {
         guard let url = comps?.url else { throw APIError.invalidURL }
 
         var req = URLRequest(url: url)
-        req.setValue("application/json", forHTTPHeaderField: "Accept")
+        req.setValue(accept, forHTTPHeaderField: "Accept")
 
         let data: Data
         let resp: URLResponse
@@ -224,6 +291,11 @@ private struct ForecastStop: Decodable {
 private struct ForecastTime: Decodable {
     let time: Int?
     let delay: Int?
+}
+
+// Cuerpo de error que el gateway de BA devuelve cuando el backend SOAP cae.
+private struct BAErrorEnvelope: Decodable {
+    let error: String?
 }
 
 // MARK: - DTOs serviceAlerts
