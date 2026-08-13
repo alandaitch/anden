@@ -11,6 +11,30 @@ Andén responde la única pregunta del pasajero: **cuántos minutos falta tu tre
 
 ![Pantallas de Andén](docs/screenshots.png)
 
+## Descargar e instalar (sin App Store)
+
+Andén no está en la App Store. iOS no permite "bajá el archivo y tocá instalar" como Android, pero sí se instala gratis con tu propio Apple ID. Bajá el `.ipa` de la última release y firmalo con AltStore o SideStore.
+
+➡️ **[Descargá `Anden.ipa` acá](https://github.com/alandaitch/anden/releases/latest)**
+
+### iPhone, con AltStore (necesitás una Mac o PC una sola vez)
+
+1. Instalá **[AltStore](https://altstore.io)** en tu iPhone (se instala desde AltServer en tu Mac/PC).
+2. Pasá `Anden.ipa` a tu iPhone (AirDrop, Archivos, iCloud).
+3. Abrí **AltStore → My Apps → +** y elegí `Anden.ipa`.
+4. Firmá con tu **Apple ID gratis** cuando lo pida.
+5. Andá a **Ajustes → General → VPN y gestión de dispositivos** y confiá en tu perfil.
+
+### iPhone, con SideStore (sin cable, todo desde el teléfono)
+
+Igual que arriba pero con **[SideStore](https://sidestore.io)**. Requiere un pairing inicial, después renueva por Wi-Fi.
+
+### Notas honestas
+
+- Es **tu** Apple ID: nadie ve tus datos. No hace falta jailbreak.
+- Con Apple ID gratis, la app **se renueva cada 7 días** (AltStore/SideStore lo hacen solo si están activos). Con cuenta de pago dura 1 año.
+- Alternativa para devs: cloná el repo y compilá con Xcode (ver [Compilar](#compilar)).
+
 ## Funciones
 
 - **Cercanas**: ordena las estaciones por tu ubicación y muestra el próximo tren de cada una.

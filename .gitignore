@@ -27,3 +27,8 @@ docs/token.dat
 # Python (scripts de research en docs/)
 __pycache__/
 *.pyc
+
+# Empaquetado IPA
+build-ipa/
+Payload/
+*.ipa
