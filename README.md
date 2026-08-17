@@ -7,45 +7,36 @@
 
 ---
 
+> ## ⚠️ Prototipo — leé esto antes de usarlo
+>
+> Andén es un **prototipo experimental**, sin mantenimiento y sin garantía de ningún tipo.
+>
+> - **No tiene soporte ni mantenimiento.** Puede dejar de funcionar en cualquier momento (las fuentes de datos son de terceros y cambian sin aviso).
+> - **El autor no se hace responsable** de nada relacionado con su uso: datos incorrectos, demoras, decisiones de viaje, ni cualquier daño directo o indirecto. Usalo **bajo tu propia responsabilidad**.
+> - **No es oficial.** No está afiliada a Trenes Argentinos (SOFSE), al Gobierno de la Ciudad de Buenos Aires, a SUBE ni a ningún operador. Usa APIs públicas de terceros.
+> - **No está en ninguna tienda de apps.** La única forma de obtenerla es descargando el APK (Android) de las Releases de este repo, o compilando el código.
+>
+> Se distribuye "tal cual" (AS IS), sin garantías, bajo licencia MIT.
+
 Andén responde la única pregunta del pasajero: **cuántos minutos falta tu tren en tu estación**. Demora real, andén, GPS del tren en vivo y alertas de la línea, en un toque.
 
 ![Pantallas de Andén](docs/screenshots.png)
 
-## Descargar e instalar (sin App Store)
+## Descargar (Android)
 
-Andén no está en la App Store. iOS no permite "bajá el archivo y tocá instalar" como Android, pero sí se instala gratis con tu propio Apple ID. Bajá el `.ipa` de la última release y firmalo con AltStore o SideStore.
-
-➡️ **[Descargá `Anden.ipa` acá](https://github.com/alandaitch/anden/releases/latest)**
-
-### iPhone, con AltStore (necesitás una Mac o PC una sola vez)
-
-1. Instalá **[AltStore](https://altstore.io)** en tu iPhone (se instala desde AltServer en tu Mac/PC).
-2. Pasá `Anden.ipa` a tu iPhone (AirDrop, Archivos, iCloud).
-3. Abrí **AltStore → My Apps → +** y elegí `Anden.ipa`.
-4. Firmá con tu **Apple ID gratis** cuando lo pida.
-5. Andá a **Ajustes → General → VPN y gestión de dispositivos** y confiá en tu perfil.
-
-### iPhone, con SideStore (sin cable, todo desde el teléfono)
-
-Igual que arriba pero con **[SideStore](https://sidestore.io)**. Requiere un pairing inicial, después renueva por Wi-Fi.
-
-### Notas honestas (iPhone)
-
-- Es **tu** Apple ID: nadie ve tus datos. No hace falta jailbreak.
-- Con Apple ID gratis, la app **se renueva cada 7 días** (AltStore/SideStore lo hacen solo si están activos). Con cuenta de pago dura 1 año.
-- Alternativa para devs: cloná el repo y compilá con Xcode (ver [Compilar](#compilar)).
-
-### Android — instalá el APK directo
-
-En Android es más simple: bajás el APK y lo instalás.
+La única forma de obtener Andén es bajando el **APK** de las Releases de este repo. No está en Google Play ni en ninguna tienda.
 
 ➡️ **[Descargá `Anden-android.apk` acá](https://github.com/alandaitch/anden/releases/latest)**
 
 1. Abrí `Anden-android.apk` en tu teléfono.
 2. Si te pide, permití **instalar apps de esta fuente** (Ajustes → apps desconocidas).
-3. Instalá y listo. No caduca.
+3. Instalá y listo.
 
 App nativa (Kotlin + Jetpack Compose + osmdroid). Código en [`android/`](android/).
+
+### iOS
+
+No hay APK equivalente para iOS: hay que **compilarla vos** con Xcode (ver [Compilar](#compilar)).
 
 ## Funciones
 
