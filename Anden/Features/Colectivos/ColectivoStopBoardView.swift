@@ -3,31 +3,27 @@ import Observation
 import CoreLocation
 
 // ViewModel del tablero de arribos de una parada de colectivo.
-// Consulta forecastGTFS por StopCode. OJO: hoy el backend SOAP de BA devuelve 503,
-// por eso maneja explícitamente serviceUnavailable como estado propio.
+// Usa la API OneBusAway de cuandosubo (pública, sin credenciales).
 @MainActor
 @Observable
 final class ColectivoStopViewModel {
-    let stop: BusStop
+    let stop: ObaStopRef
 
     enum Phase: Equatable {
         case loading
         case ready
-        case empty                 // servicio OK pero sin arribos ahora
-        case unavailable(String)   // backend de arribos caído (503)
+        case empty        // servicio OK pero sin arribos ahora
         case error(String)
     }
 
     private(set) var phase: Phase = .loading
-    private(set) var arrivals: [BusArrival] = []
+    private(set) var arrivals: [BusArrivalOba] = []
     private(set) var lastUpdated: Date?
 
     private var refreshTask: Task<Void, Never>?
     private let interval: TimeInterval = 30
 
-    var isConfigured: Bool { BASecrets.isConfigured }
-
-    init(stop: BusStop) {
+    init(stop: ObaStopRef) {
         self.stop = stop
     }
 
@@ -45,7 +41,6 @@ final class ColectivoStopViewModel {
     }
 
     func startAutoRefresh() {
-        guard isConfigured else { return }
         stopAutoRefresh()
         let interval = interval
         refreshTask = Task { [weak self] in
@@ -69,16 +64,12 @@ final class ColectivoStopViewModel {
     }
 
     func load(initial: Bool) async {
-        guard isConfigured else { return }
         if initial || arrivals.isEmpty { phase = .loading }
         do {
-            let list = try await BAClient.shared.colectivoArrivals(stopCode: stop.code)
+            let list = try await ObaClient.shared.stopArrivals(stopId: stop.stopId)
             arrivals = list
             phase = list.isEmpty ? .empty : .ready
             lastUpdated = Date()
-        } catch let APIError.serviceUnavailable(message) {
-            arrivals = []
-            phase = .unavailable(message ?? "El servicio de arribos de colectivos de la Ciudad no responde ahora.")
         } catch {
             if arrivals.isEmpty {
                 phase = .error(SubteFormat.message(for: error))
@@ -92,20 +83,23 @@ struct ColectivoStopBoardView: View {
     @State private var vm: ColectivoStopViewModel
     @Environment(\.scenePhase) private var scenePhase
 
-    init(stop: BusStop) {
+    init(stop: ObaStopRef) {
         _vm = State(initialValue: ColectivoStopViewModel(stop: stop))
     }
 
-    private var stop: BusStop { vm.stop }
+    private var stop: ObaStopRef { vm.stop }
 
     var body: some View {
-        Group {
-            if !vm.isConfigured {
-                notConfigured
-            } else {
-                scroll
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                header
+                content
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 32)
         }
+        .refreshable { await vm.refresh() }
         .background(Palette.background.ignoresSafeArea())
         .navigationTitle("Parada")
         .navigationBarTitleDisplayMode(.inline)
@@ -122,19 +116,6 @@ struct ColectivoStopBoardView: View {
                 break
             }
         }
-    }
-
-    private var scroll: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                header
-                content
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .padding(.bottom, 32)
-        }
-        .refreshable { await vm.refresh() }
     }
 
     // MARK: - Header
@@ -156,7 +137,7 @@ struct ColectivoStopBoardView: View {
                         .foregroundStyle(Palette.textPrimary)
                         .lineLimit(3)
                         .minimumScaleFactor(0.7)
-                    Text("Parada \(stop.code)")
+                    Text("Parada de colectivo")
                         .font(.anden(13, weight: .semibold))
                         .foregroundStyle(Palette.textSecondary)
                 }
@@ -245,16 +226,6 @@ struct ColectivoStopBoardView: View {
             )
             .padding(.top, 40)
 
-        case .unavailable(let message):
-            EmptyStateView(
-                icon: "antenna.radiowaves.left.and.right.slash",
-                title: "Arribos no disponibles",
-                message: message,
-                actionTitle: "Reintentar",
-                action: { Task { await vm.load(initial: true) } }
-            )
-            .padding(.top, 30)
-
         case .error(let message):
             ErrorStateView(message: message, retry: { Task { await vm.load(initial: true) } })
                 .padding(.top, 40)
@@ -277,45 +248,45 @@ struct ColectivoStopBoardView: View {
             }
         }
     }
-
-    // MARK: - Sin credenciales
-
-    private var notConfigured: some View {
-        EmptyStateView(
-            icon: "key.horizontal",
-            title: "Configurá la API de la Ciudad",
-            message: "Faltan las credenciales de la API Transporte Buenos Aires para mostrar los arribos."
-        )
-        .padding(.top, 60)
-    }
 }
 
-// Fila de un arribo de colectivo: badge de línea + destino + countdown + demora.
+// Fila de un arribo de colectivo: badge de línea + destino + countdown + VIVO/prog.
 struct ColectivoArrivalRow: View {
-    let arrival: BusArrival
+    let arrival: BusArrivalOba
 
-    private var color: Color { BusLine.color(for: arrival.lineName) }
+    private var color: Color { BusLine.color(for: arrival.lineShort) }
 
     var body: some View {
         HStack(spacing: 12) {
-            BusLineBadge(lineName: arrival.lineName, size: 38)
+            BusLineBadge(lineName: arrival.lineShort, size: 38)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(arrival.destino.map { "a \($0)" } ?? "Línea \(arrival.lineName)")
+                Text(arrival.headsign.isEmpty ? "Línea \(arrival.lineShort)" : arrival.headsign)
                     .font(.anden(16, weight: .semibold))
                     .foregroundStyle(Palette.textPrimary)
                     .lineLimit(1)
-                Text("Hora \(Formatting.clock(arrival.eta))")
-                    .font(.anden(12, weight: .medium))
-                    .foregroundStyle(Palette.textSecondary)
+                HStack(spacing: 6) {
+                    if arrival.isLive {
+                        LiveDot(active: true, color: Palette.onTime, size: 6)
+                        Text("En vivo")
+                            .font(.anden(12, weight: .bold))
+                            .foregroundStyle(Palette.onTime)
+                    } else {
+                        Text("Programado")
+                            .font(.anden(12, weight: .semibold))
+                            .foregroundStyle(Palette.textSecondary)
+                    }
+                    if let eta = arrival.eta {
+                        Text("· \(Formatting.clock(eta))")
+                            .font(.anden(12, weight: .medium))
+                            .foregroundStyle(Palette.textSecondary)
+                    }
+                }
             }
 
             Spacer(minLength: 8)
 
-            VStack(alignment: .trailing, spacing: 6) {
-                CountdownText(secondsUntil: arrival.secondsUntil, big: false)
-                DelayPill(arrival.delay, compact: true)
-            }
+            CountdownText(secondsUntil: arrival.secondsUntil, big: false)
         }
         .padding(.vertical, 12)
         .padding(.horizontal, 14)
@@ -329,7 +300,7 @@ struct ColectivoArrivalRow: View {
         }
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Línea \(arrival.lineName)\(arrival.destino.map { " a \($0)" } ?? ""), \(Formatting.etaText(secondsUntil: arrival.secondsUntil)), \(arrival.delay.label)")
+        .accessibilityLabel("Línea \(arrival.lineShort)\(arrival.headsign.isEmpty ? "" : ", \(arrival.headsign)"), \(Formatting.etaText(secondsUntil: arrival.secondsUntil))\(arrival.isLive ? ", en vivo" : "")")
     }
 }
 

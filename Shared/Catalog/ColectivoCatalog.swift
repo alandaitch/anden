@@ -54,6 +54,26 @@ final class ColectivoCatalog {
         lineByRouteId[routeId]?.shortName ?? routeId
     }
 
+    // Nombre "lindo" de la parada más cercana a una coord, dentro de maxMeters.
+    // Arregla los nombres crudos de OneBusAway ("359 CALLAO AV." -> "Av. Callao 359").
+    // Un solo barrido lineal, sin ordenar. nil si no matchea.
+    func nearestStopName(to coordinate: CLLocationCoordinate2D, maxMeters: CLLocationDistance = 40) -> String? {
+        guard !stops.isEmpty else { return nil }
+        let cosLat = cos(coordinate.latitude * .pi / 180)
+        var best: BusStop?
+        var bestD = Double.greatestFiniteMagnitude
+        for s in stops {
+            let dLat = s.lat - coordinate.latitude
+            let dLng = (s.lng - coordinate.longitude) * cosLat
+            let d = dLat * dLat + dLng * dLng
+            if d < bestD { bestD = d; best = s }
+        }
+        guard let b = best else { return nil }
+        let meters = CLLocation(latitude: b.lat, longitude: b.lng)
+            .distance(from: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude))
+        return meters <= maxMeters ? b.name : nil
+    }
+
     // Paradas más cercanas, ordenadas por distancia. Devuelve metros reales.
     // Prefiltra por distancia equirectangular barata para no crear 42805 CLLocation.
     func nearbyStops(to coordinate: CLLocationCoordinate2D, limit: Int = 12) -> [(BusStop, CLLocationDistance)] {

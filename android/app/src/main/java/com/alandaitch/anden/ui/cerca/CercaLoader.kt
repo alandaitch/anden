@@ -10,7 +10,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import com.alandaitch.anden.data.catalog.ColectivoCatalog
 import com.alandaitch.anden.data.catalog.StationCatalog
 import com.alandaitch.anden.data.catalog.SubteCatalog
 import com.alandaitch.anden.data.net.BaApi
@@ -46,17 +45,20 @@ class CercaLoader {
         try {
             val base = buildBase(point)
             items = base
-            items = enrich(base)
+            val enriched = enrich(base)
+            items = enriched
+            // Colectivos: líneas cercanas con "cuándo llega" (OneBusAway). Degrada a vacío.
+            val busItems = loadBusLines(point)
+            items = (enriched + busItems).sortedBy { it.distanceMeters }
         } finally {
             isLoading = false
         }
     }
 
-    // Filas base desde catálogos (sync) + EcoBici (red, degrada a vacío).
+    // Filas base desde catálogos (sync) + EcoBici (red, degrada a vacío). Sin colectivos.
     private suspend fun buildBase(point: GeoPoint): List<NearbyItem> {
         val trainPairs = StationCatalog.shared.nearest(point, limit = 5)
         val subtePairs = SubteCatalog.shared.nearest(point, limit = 5)
-        val bondiPairs = ColectivoCatalog.shared.nearbyStops(point, limit = 12)
 
         val biciItems: List<NearbyItem> = try {
             BaApi.shared.ecobiciStations()
@@ -102,24 +104,46 @@ class CercaLoader {
             )
         }
         result.addAll(biciItems)
-        bondiPairs.forEach { (stop, dist) ->
-            result.add(
-                NearbyItem(
-                    id = "bondi-${stop.code}",
-                    mode = NearbyMode.BONDI,
-                    title = stop.name,
-                    distanceMeters = dist,
-                    point = stop.coordinate,
-                    accent = Palette.brand,
-                    badge = BadgeKind.Bus,
-                    subtitle = null,
-                    subtitleColor = Palette.textSecondaryDark,
-                    nav = NearbyNav.Bondi(stop.code),
-                )
-            )
-        }
         result.sortBy { it.distanceMeters }
         return result
+    }
+
+    // Colectivos: líneas cercanas con "cuándo llega" (OneBusAway de cuandosubo).
+    // Una fila por (línea + destino), con la parada del próximo arribo. Degrada a vacío.
+    private suspend fun loadBusLines(point: GeoPoint): List<NearbyItem> {
+        val lines = try {
+            com.alandaitch.anden.data.net.ObaApi.shared.nearbyBusLines(point)
+        } catch (_: Exception) {
+            emptyList()
+        }
+        // Cache por parada: cruza la coord de OneBusAway al nombre lindo del catálogo.
+        val nameCache = HashMap<String, String>()
+        fun prettyStop(line: com.alandaitch.anden.data.model.BusLineNearby): String {
+            nameCache[line.stopId]?.let { return it }
+            val clean = com.alandaitch.anden.data.catalog.ColectivoCatalog.shared
+                .nearestStopName(line.coordinate) ?: line.stopName
+            nameCache[line.stopId] = clean
+            return clean
+        }
+        return lines.map { line ->
+            val dist = Geo.distanceMeters(point, line.coordinate)
+            val eta = Formatting.etaText(line.secondsUntil)
+            val estado = if (line.isLive) "en vivo" else "prog"
+            val stopName = prettyStop(line)
+            val title = Formatting.busDestination(line.lineShort, line.headsign)
+            NearbyItem(
+                id = "bondi-${line.stopId}-${line.lineShort}-${line.headsign}",
+                mode = NearbyMode.BONDI,
+                title = title,
+                distanceMeters = dist,
+                point = line.coordinate,
+                accent = com.alandaitch.anden.data.model.BusLine.color(line.lineShort),
+                badge = BadgeKind.BusLine(line.lineShort),
+                subtitle = "$eta $estado · $stopName",
+                subtitleColor = if (line.isLive) Palette.onTime else Palette.minorDelay,
+                nav = NearbyNav.Bondi(line.stopId, stopName, line.coordinate.lat, line.coordinate.lng),
+            )
+        }
     }
 
     private fun biciItem(st: com.alandaitch.anden.data.model.EcobiciStation, dist: Double): NearbyItem {

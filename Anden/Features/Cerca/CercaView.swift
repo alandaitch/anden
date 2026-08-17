@@ -38,8 +38,8 @@ struct CercaView: View {
             .navigationDestination(for: SubteStationRef.self) { ref in
                 SubteStationBoardView(stationName: ref.stationName, line: ref.line)
             }
-            .navigationDestination(for: BusStop.self) { stop in
-                ColectivoStopBoardView(stop: stop)
+            .navigationDestination(for: ObaStopRef.self) { ref in
+                ColectivoStopBoardView(stop: ref)
             }
             .navigationDestination(for: EcobiciStation.self) { station in
                 EcobiciStopDetailView(station: station)
@@ -158,18 +158,22 @@ struct CercaView: View {
             } else {
                 LoadingStateView(message: "Buscando tu ubicación…")
             }
-        } else if viewModel.isLoading && viewModel.items.isEmpty {
+        } else if viewModel.isLoading && viewModel.isEmpty {
             LoadingStateView(message: "Buscando transporte cerca tuyo…")
         } else {
-            let items = viewModel.filteredItems(filter)
-            if items.isEmpty {
-                EmptyStateView(
-                    icon: "mappin.slash",
-                    title: "Nada cerca",
-                    message: emptyMessage
-                )
+            let entries = viewModel.entries(filter)
+            if entries.isEmpty {
+                if (filter == .bondi || filter == .todos) && viewModel.busLoading {
+                    LoadingStateView(message: "Buscando colectivos cerca tuyo…")
+                } else {
+                    EmptyStateView(
+                        icon: "mappin.slash",
+                        title: "Nada cerca",
+                        message: emptyMessage
+                    )
+                }
             } else {
-                list(items)
+                list(entries)
             }
         }
     }
@@ -180,19 +184,29 @@ struct CercaView: View {
         case .tren:   return "No hay estaciones de tren con servicio cerca tuyo."
         case .subte:  return "No hay estaciones de subte cerca tuyo."
         case .bici:   return "No hay estaciones de EcoBici cerca tuyo."
-        case .bondi:  return "No hay paradas de colectivo cerca tuyo."
+        case .bondi:  return "No hay líneas de colectivo con arribos cerca tuyo."
         }
     }
 
-    private func list(_ items: [NearbyItem]) -> some View {
+    private func list(_ entries: [CercaEntry]) -> some View {
         ScrollView {
             LazyVStack(spacing: 10) {
-                ForEach(items) { item in
-                    NearbyItemRow(item: item) {
-                        MapsOpener.walk(to: item.coordinate, name: item.name)
-                    }
-                    .onTapGesture {
-                        path.append(item.route)
+                ForEach(entries) { entry in
+                    switch entry {
+                    case .item(let item):
+                        NearbyItemRow(item: item) {
+                            MapsOpener.walk(to: item.coordinate, name: item.name)
+                        }
+                        .onTapGesture {
+                            path.append(item.route)
+                        }
+                    case .bus(let line):
+                        BusLineNearbyRow(line: line) {
+                            MapsOpener.walk(to: line.stopCoordinate, name: line.stopName)
+                        }
+                        .onTapGesture {
+                            path.append(.bondi(line.stopRef))
+                        }
                     }
                 }
             }
@@ -218,7 +232,20 @@ private extension NavigationPath {
         case .train(let station):   append(station)
         case .subte(let ref):       append(ref)
         case .bici(let station):    append(station)
-        case .bondi(let stop):      append(stop)
+        case .bondi(let ref):       append(ref)
+        }
+    }
+}
+
+// Una entrada de la lista mezclada: fila de modo (tren/subte/bici) o línea de colectivo.
+enum CercaEntry: Identifiable {
+    case item(NearbyItem)
+    case bus(BusLineNearby)
+
+    var id: String {
+        switch self {
+        case .item(let i): return "i-\(i.id)"
+        case .bus(let b):  return "b-\(b.id)"
         }
     }
 }
@@ -287,7 +314,7 @@ enum CercaRoute: Hashable {
     case train(Station)
     case subte(SubteStationRef)
     case bici(EcobiciStation)
-    case bondi(BusStop)
+    case bondi(ObaStopRef)
 }
 
 // Una fila de la lista mezclada, ya resuelta con su mini-dato y su color de modo.
@@ -401,49 +428,153 @@ struct NearbyItemRow: View {
     }
 }
 
+// MARK: - Fila de línea de colectivo cercana
+
+// Muestra una LÍNEA (no una parada): badge del nº, destino, cuándo llega
+// (VIVO/programado), la parada por la que pasa y un botón "Ir".
+struct BusLineNearbyRow: View {
+    let line: BusLineNearby
+    let onGo: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            BusLineBadge(lineName: line.lineShort, size: 40)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(line.headsign.isEmpty ? "Línea \(line.lineShort)" : line.headsign)
+                    .font(.anden(16, weight: .semibold))
+                    .foregroundStyle(Palette.textPrimary)
+                    .lineLimit(1)
+
+                HStack(spacing: 6) {
+                    if line.isLive {
+                        LiveDot(active: true, color: Palette.onTime, size: 6)
+                        Text(Formatting.etaText(secondsUntil: line.secondsUntil))
+                            .font(.anden(12, weight: .bold))
+                            .foregroundStyle(Palette.onTime)
+                    } else {
+                        Text(Formatting.etaText(secondsUntil: line.secondsUntil))
+                            .font(.anden(12, weight: .bold))
+                            .foregroundStyle(Palette.textSecondary)
+                        Text("· prog.")
+                            .font(.anden(11, weight: .medium))
+                            .foregroundStyle(Palette.textSecondary)
+                    }
+                }
+                .lineLimit(1)
+
+                Text(line.stopName)
+                    .font(.anden(12, weight: .medium))
+                    .foregroundStyle(Palette.textSecondary)
+                    .lineLimit(1)
+            }
+
+            Spacer(minLength: 8)
+
+            Button(action: onGo) {
+                VStack(spacing: 3) {
+                    Image(systemName: "figure.walk")
+                        .font(.system(size: 15, weight: .bold))
+                    Text("Ir")
+                        .font(.anden(11, weight: .bold))
+                }
+                .foregroundStyle(Palette.brand)
+                .frame(width: 46, height: 46)
+                .background(Circle().fill(Palette.brand.opacity(0.14)))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Ir a la parada \(line.stopName)")
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(Palette.textSecondary.opacity(0.5))
+        }
+        .padding(.vertical, 11)
+        .padding(.horizontal, 14)
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Palette.surface))
+        .overlay(alignment: .leading) {
+            RoundedRectangle(cornerRadius: 3)
+                .fill(BusLine.color(for: line.lineShort))
+                .frame(width: 4)
+                .padding(.vertical, 12)
+                .padding(.leading, 2)
+        }
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Línea \(line.lineShort)\(line.headsign.isEmpty ? "" : ", \(line.headsign)"), \(Formatting.etaText(secondsUntil: line.secondsUntil))\(line.isLive ? ", en vivo" : ""), desde \(line.stopName)")
+    }
+}
+
 // MARK: - ViewModel
 
 @MainActor
 @Observable
 final class CercaViewModel {
+    // items = tren + subte + bici (ordenados por distancia). Colectivos van aparte.
     private(set) var items: [NearbyItem] = []
+    private(set) var busLines: [BusLineNearby] = []   // líneas de colectivo, ordenadas por minutos
     private(set) var isLoading = false
+    private(set) var busLoading = false
+    private var origin: CLLocationCoordinate2D?
+
+    var isEmpty: Bool { items.isEmpty && busLines.isEmpty }
 
     // Cantidades por modo cuando se muestran mezclados.
     private let trainLimit = 5
     private let subteLimit = 5
     private let biciLimit = 5
-    private let bondiLimit = 12   // paradas cargadas (el modo Bondi las muestra todas)
     private let bondiCapTodos = 6 // tope de colectivos en "Todos" para no inundar
 
-    func filteredItems(_ filter: CercaFilter) -> [NearbyItem] {
+    // Entradas a mostrar según el filtro. En "Bondi" y "Todos" son LÍNEAS de colectivo
+    // (con cuándo llega), no paradas sueltas.
+    func entries(_ filter: CercaFilter) -> [CercaEntry] {
         switch filter {
+        case .tren:  return items.filter { $0.mode == .tren }.map { CercaEntry.item($0) }
+        case .subte: return items.filter { $0.mode == .subte }.map { CercaEntry.item($0) }
+        case .bici:  return items.filter { $0.mode == .bici }.map { CercaEntry.item($0) }
+        case .bondi: return busLines.map { CercaEntry.bus($0) }   // ya ordenadas por minutos
         case .todos:
-            // En "Todos", limitamos los colectivos a los 6 más cercanos.
-            var bondiSeen = 0
-            return items.filter { item in
-                guard item.mode == .bondi else { return true }
-                bondiSeen += 1
-                return bondiSeen <= bondiCapTodos
-            }
-        case .tren:  return items.filter { $0.mode == .tren }
-        case .subte: return items.filter { $0.mode == .subte }
-        case .bici:  return items.filter { $0.mode == .bici }
-        case .bondi: return items.filter { $0.mode == .bondi }
+            // Tren/subte/bici por distancia + hasta 6 colectivos (los que antes llegan),
+            // todo mezclado y ordenado por distancia a la parada/estación.
+            var combined = items.map { CercaEntry.item($0) }
+            combined += busLines.prefix(bondiCapTodos).map { CercaEntry.bus($0) }
+            let origin = self.origin
+            combined.sort { entryDistance($0, from: origin) < entryDistance($1, from: origin) }
+            return combined
+        }
+    }
+
+    // Distancia de una entrada al origen, para ordenar la mezcla "Todos".
+    private func entryDistance(_ entry: CercaEntry, from origin: CLLocationCoordinate2D?) -> CLLocationDistance {
+        switch entry {
+        case .item(let item):
+            return item.distance
+        case .bus(let line):
+            guard let origin else { return .greatestFiniteMagnitude }
+            let a = CLLocation(latitude: origin.latitude, longitude: origin.longitude)
+            let b = CLLocation(latitude: line.stopCoordinate.latitude, longitude: line.stopCoordinate.longitude)
+            return a.distance(from: b)
         }
     }
 
     func load(coordinate: CLLocationCoordinate2D?) async {
         guard let coordinate else { return }
-        isLoading = items.isEmpty
-        defer { isLoading = false }
+        isLoading = isEmpty
+        busLoading = busLines.isEmpty
+        origin = coordinate
+        defer {
+            isLoading = false
+            busLoading = false
+        }
 
         let origin = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+
+        // 0. Colectivos: líneas cercanas con "cuándo llega" (OneBusAway). En paralelo.
+        async let busTask: [BusLineNearby]? = try? await ObaClient.shared.nearbyBusLines(near: coordinate, radius: 500, maxStops: 10)
 
         // 1. Bases sincrónicas desde los catálogos embebidos.
         let trainPairs = StationCatalog.shared.nearest(to: coordinate, limit: trainLimit)
         let subtePairs = SubteCatalog.shared.nearest(to: coordinate, limit: subteLimit)
-        let bondiPairs = ColectivoCatalog.shared.nearbyStops(to: coordinate, limit: bondiLimit)
 
         // 2. EcoBici: red. Trae disponibilidad de una sola llamada.
         var biciPairs: [(EcobiciStation, CLLocationDistance)] = []
@@ -460,13 +591,28 @@ final class CercaViewModel {
         result.append(contentsOf: trainPairs.map { pair in trainItem(pair.0, distance: pair.1) })
         result.append(contentsOf: subtePairs.map { pair in subteItem(pair.0, distance: pair.1, subtitle: nil, color: Palette.textSecondary) })
         result.append(contentsOf: biciPairs.map { pair in biciItem(pair.0, distance: pair.1) })
-        result.append(contentsOf: bondiPairs.map { pair in bondiItem(pair.0, distance: pair.1) })
         result.sort { $0.distance < $1.distance }
         items = result
 
         // 4. Enriquecer con el próximo arribo (barato): tren y subte.
         await enrichTrains(trainPairs)
         await enrichSubtes(subtePairs)
+
+        // 5. Resolver las líneas de colectivo (esperan la red OBA).
+        //    Cruza la coord de cada parada al nombre lindo del catálogo (cache por parada).
+        let rawLines = (await busTask) ?? []
+        var nameCache: [String: String] = [:]
+        busLines = rawLines.map { line in
+            var l = line
+            if let cached = nameCache[l.stopId] {
+                l.stopName = cached
+            } else {
+                let clean = ColectivoCatalog.shared.nearestStopName(to: l.stopCoordinate) ?? l.stopName
+                nameCache[l.stopId] = clean
+                l.stopName = clean
+            }
+            return l
+        }
     }
 
     // MARK: - Constructores de fila
@@ -523,21 +669,6 @@ final class CercaViewModel {
             subtitle: subtitle,
             subtitleColor: color,
             route: .bici(station)
-        )
-    }
-
-    private func bondiItem(_ stop: BusStop, distance: CLLocationDistance) -> NearbyItem {
-        NearbyItem(
-            id: "bondi-\(stop.code)",
-            mode: .bondi,
-            name: stop.name,
-            distance: distance,
-            coordinate: stop.coordinate,
-            accentColor: Palette.brand,
-            badgeText: "",
-            subtitle: nil,
-            subtitleColor: Palette.textSecondary,
-            route: .bondi(stop)
         )
     }
 

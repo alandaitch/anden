@@ -34,6 +34,17 @@ object Formatting {
         return "a $s km"
     }
 
+    // Etiqueta de destino de un colectivo. Evita el doble "a a Retiro" cuando el
+    // headsign de OneBusAway ya viene con "a " adelante. Sin destino: "Línea NN".
+    fun busDestination(lineShort: String, headsign: String): String {
+        val d = headsign.trim()
+        return when {
+            d.isBlank() -> "Línea $lineShort"
+            d.startsWith("a ", ignoreCase = true) -> d
+            else -> "a $d"
+        }
+    }
+
     // Hora local de Buenos Aires, formato HH:mm.
     fun clock(instant: Instant?): String {
         if (instant == null) return "--:--"

@@ -1,0 +1,204 @@
+package com.alandaitch.anden.data.net
+
+import com.alandaitch.anden.data.model.BusArrivalOba
+import com.alandaitch.anden.data.model.BusLineNearby
+import com.alandaitch.anden.util.Geo
+import com.alandaitch.anden.util.GeoPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.time.Instant
+import java.util.concurrent.TimeUnit
+
+// Cliente OneBusAway de cuandosubo (SUBE). Da arribos de colectivo en vivo.
+// key=web es una key PÚBLICA de la webapp, no un secreto. Se embebe.
+class ObaApi(
+    private val client: OkHttpClient = defaultClient()
+) {
+    private val base = "https://cuandosubo.sube.gob.ar/onebusaway-api-webapp/api/where"
+    private val key = "web"
+    private val json = Json { ignoreUnknownKeys = true }
+
+    // "Líneas cercanas con cuándo llega" (algoritmo de 4 pasos):
+    // 1) paradas alrededor del usuario. 2) arribos de las maxStops más cercanas en
+    // paralelo (timeout 15s). 3) agrupar por (línea + destino), próximo arribo futuro.
+    // 4) ordenar por minutos.
+    suspend fun nearbyBusLines(
+        near: GeoPoint,
+        radius: Int = 500,
+        maxStops: Int = 10
+    ): List<BusLineNearby> {
+        val stops = nearbyStops(near, radius)
+            .sortedBy { Geo.distanceMeters(near, GeoPoint(it.lat ?: 0.0, it.lon ?: 0.0)) }
+            .take(maxStops)
+        if (stops.isEmpty()) return emptyList()
+
+        val now = Instant.now().epochSecond
+
+        val perStop: List<List<BusLineNearby>> = withTimeoutOrNull(15_000) {
+            coroutineScope {
+                stops.map { stop ->
+                    async {
+                        val sid = stop.id ?: return@async emptyList<BusLineNearby>()
+                        val lat = stop.lat ?: 0.0
+                        val lon = stop.lon ?: 0.0
+                        val name = stop.name ?: "Parada"
+                        val arrivals = try {
+                            stopArrivalsRaw(sid)
+                        } catch (_: Exception) {
+                            emptyList()
+                        }
+                        arrivals.mapNotNull { a ->
+                            val short = a.routeShortName ?: return@mapNotNull null
+                            val predicted = a.predicted == true && (a.predictedArrivalTime ?: 0L) > 0L
+                            val millis = if (predicted) a.predictedArrivalTime!! else (a.scheduledArrivalTime ?: return@mapNotNull null)
+                            val etaSec = millis / 1000
+                            val secondsUntil = (etaSec - now).toInt()
+                            if (secondsUntil < 0) return@mapNotNull null
+                            BusLineNearby(
+                                lineShort = short,
+                                headsign = a.tripHeadsign ?: "",
+                                eta = Instant.ofEpochSecond(etaSec),
+                                secondsUntil = secondsUntil,
+                                isLive = predicted,
+                                stopName = name,
+                                stopId = sid,
+                                stopLat = lat,
+                                stopLng = lon
+                            )
+                        }
+                    }
+                }.awaitAll()
+            }
+        } ?: emptyList()
+
+        // Agrupar por (línea + destino): próximo arribo futuro (menor secondsUntil).
+        val byGroup = HashMap<String, BusLineNearby>()
+        for (list in perStop) {
+            for (item in list) {
+                val gkey = "${item.lineShort}|${item.headsign}"
+                val prev = byGroup[gkey]
+                if (prev == null || item.secondsUntil < prev.secondsUntil) {
+                    byGroup[gkey] = item
+                }
+            }
+        }
+        return byGroup.values.sortedBy { it.secondsUntil }
+    }
+
+    // Arribos de una parada (para el tablero). Ordenados por tiempo, futuros.
+    suspend fun stopArrivals(stopId: String): List<BusArrivalOba> {
+        val now = Instant.now().epochSecond
+        return stopArrivalsRaw(stopId).mapNotNull { a ->
+            val short = a.routeShortName ?: return@mapNotNull null
+            val predicted = a.predicted == true && (a.predictedArrivalTime ?: 0L) > 0L
+            val millis = if (predicted) a.predictedArrivalTime!! else (a.scheduledArrivalTime ?: return@mapNotNull null)
+            val etaSec = millis / 1000
+            val secondsUntil = (etaSec - now).toInt()
+            if (secondsUntil < 0) return@mapNotNull null
+            BusArrivalOba(
+                lineShort = short,
+                headsign = a.tripHeadsign ?: "",
+                eta = Instant.ofEpochSecond(etaSec),
+                secondsUntil = secondsUntil,
+                isLive = predicted
+            )
+        }.sortedBy { it.secondsUntil }
+    }
+
+    // MARK: - Endpoints crudos
+
+    private suspend fun nearbyStops(near: GeoPoint, radius: Int): List<ObaStop> {
+        val data = get(
+            "stops-for-location.json",
+            mapOf("lat" to near.lat.toString(), "lon" to near.lng.toString(), "radius" to radius.toString())
+        )
+        return decode<ObaResponse<ObaListData<ObaStop>>>(data).data?.list ?: emptyList()
+    }
+
+    private suspend fun stopArrivalsRaw(stopId: String): List<ObaArrival> {
+        val data = get("arrivals-and-departures-for-stop/$stopId.json", emptyMap())
+        return decode<ObaResponse<ObaEntryData>>(data).data?.entry?.arrivalsAndDepartures ?: emptyList()
+    }
+
+    // MARK: - Red
+
+    private suspend fun get(path: String, params: Map<String, String>): String = withContext(Dispatchers.IO) {
+        val urlBuilder = "$base/$path".toHttpUrl().newBuilder()
+        urlBuilder.addQueryParameter("key", key)
+        for ((k, v) in params) urlBuilder.addQueryParameter(k, v)
+
+        val req = Request.Builder().url(urlBuilder.build()).header("Accept", "application/json").build()
+        val response = try {
+            client.newCall(req).execute()
+        } catch (e: Exception) {
+            throw ApiError.Transport(e)
+        }
+        val code = response.code
+        val body = response.body?.string() ?: ""
+        response.close()
+        if (code == 401 || code == 403) throw ApiError.Unauthorized
+        if (code !in 200..299) throw ApiError.Http(code, body)
+        body
+    }
+
+    private inline fun <reified T> decode(data: String): T {
+        return try {
+            json.decodeFromString(data)
+        } catch (e: Exception) {
+            throw ApiError.Decoding(e)
+        }
+    }
+
+    companion object {
+        val shared: ObaApi by lazy { ObaApi() }
+
+        private fun defaultClient(): OkHttpClient = OkHttpClient.Builder()
+            .callTimeout(15, TimeUnit.SECONDS)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .build()
+    }
+}
+
+// MARK: - DTOs OneBusAway
+
+@Serializable
+private data class ObaResponse<T>(val data: T? = null)
+
+@Serializable
+private data class ObaListData<T>(val list: List<T>? = null)
+
+@Serializable
+private data class ObaEntryData(val entry: ObaEntry? = null)
+
+@Serializable
+private data class ObaEntry(val arrivalsAndDepartures: List<ObaArrival>? = null)
+
+@Serializable
+private data class ObaStop(
+    val id: String? = null,
+    val code: String? = null,
+    val name: String? = null,
+    val lat: Double? = null,
+    val lon: Double? = null
+)
+
+@Serializable
+private data class ObaArrival(
+    val routeShortName: String? = null,
+    val tripHeadsign: String? = null,
+    val predicted: Boolean? = null,
+    val predictedArrivalTime: Long? = null,
+    val scheduledArrivalTime: Long? = null,
+    val distanceFromStop: Double? = null,
+    val stopId: String? = null
+)

@@ -52,6 +52,27 @@ class ColectivoCatalog(context: Context = AndenApp.appContext) {
     // Número de línea para mostrar. shortName si matchea, si no el propio route_id.
     fun displayLine(routeId: String): String = lineByRouteId[routeId]?.shortName ?: routeId
 
+    // Nombre "lindo" de la parada más cercana a una coord, dentro de maxMeters.
+    // Sirve para arreglar los nombres crudos de OneBusAway ("1606 MITRE BARTOLOME"
+    // -> "Bartolomé Mitre 1606"). Un solo barrido lineal, sin ordenar. null si no matchea.
+    fun nearestStopName(to: GeoPoint, maxMeters: Double = 40.0): String? {
+        if (stops.isEmpty()) return null
+        val cosLat = cos(to.lat * Math.PI / 180)
+        var best: BusStop? = null
+        var bestD = Double.MAX_VALUE
+        for (s in stops) {
+            val dLat = s.lat - to.lat
+            val dLng = (s.lng - to.lng) * cosLat
+            val d = dLat * dLat + dLng * dLng
+            if (d < bestD) {
+                bestD = d
+                best = s
+            }
+        }
+        val b = best ?: return null
+        return if (Geo.distanceMeters(b.coordinate, to) <= maxMeters) b.name else null
+    }
+
     // Paradas más cercanas, ordenadas por distancia (metros).
     // Prefiltra por distancia equirectangular barata para no medir 42805 exactas.
     fun nearbyStops(to: GeoPoint, limit: Int = 12): List<Pair<BusStop, Double>> {

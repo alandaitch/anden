@@ -35,6 +35,51 @@ struct BusArrival: Identifiable {
     var id: String { "\(lineName)-\(Int(eta.timeIntervalSince1970))-\(destino ?? "")" }
 }
 
+// MARK: - OneBusAway (cuandosubo) — arribos de colectivo en vivo
+
+// Referencia Hashable a una parada OBA, para navegar al tablero.
+// Guarda lat/lng (no CLLocationCoordinate2D) para ser Hashable.
+struct ObaStopRef: Hashable {
+    let stopId: String
+    let name: String
+    let lat: Double
+    let lng: Double
+
+    var coordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: lat, longitude: lng)
+    }
+}
+
+// Una línea de colectivo cercana con su próximo arribo, resuelta contra una parada.
+// (routeShortName + tripHeadsign) agrupados, el próximo arribo futuro.
+struct BusLineNearby: Identifiable {
+    let lineShort: String
+    let headsign: String
+    let eta: Date?
+    let secondsUntil: Int
+    let isLive: Bool
+    var stopName: String
+    let stopId: String
+    let stopCoordinate: CLLocationCoordinate2D
+
+    var id: String { "\(stopId)-\(lineShort)-\(headsign)" }
+
+    var stopRef: ObaStopRef {
+        ObaStopRef(stopId: stopId, name: stopName, lat: stopCoordinate.latitude, lng: stopCoordinate.longitude)
+    }
+}
+
+// Un arribo de colectivo en una parada (tablero de parada OBA).
+struct BusArrivalOba: Identifiable {
+    let lineShort: String
+    let headsign: String
+    let eta: Date?
+    let secondsUntil: Int
+    let isLive: Bool
+
+    var id: String { "\(lineShort)-\(headsign)-\(Int((eta ?? .distantPast).timeIntervalSince1970))" }
+}
+
 // Línea de colectivo del catálogo (colectivos-lineas.json).
 // No hay color oficial: se deriva uno determinístico del shortName.
 struct BusLine: Identifiable, Hashable {

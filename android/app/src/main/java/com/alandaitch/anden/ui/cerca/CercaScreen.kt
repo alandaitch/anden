@@ -72,7 +72,7 @@ fun CercaScreen(
     onOpenTren: (Int) -> Unit,
     onOpenSubte: (stationName: String, routeId: String?) -> Unit,
     onOpenBici: (EcobiciStation) -> Unit,
-    onOpenBondi: (stopCode: String) -> Unit,
+    onOpenBondi: (stopId: String, stopName: String, lat: Double, lng: Double) -> Unit,
     onComoLlego: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -137,7 +137,7 @@ fun CercaScreen(
                                 is NearbyNav.Tren -> onOpenTren(nav.stationId)
                                 is NearbyNav.Subte -> onOpenSubte(nav.stationName, nav.routeId)
                                 is NearbyNav.Bici -> onOpenBici(nav.station)
-                                is NearbyNav.Bondi -> onOpenBondi(nav.stopCode)
+                                is NearbyNav.Bondi -> onOpenBondi(nav.stopId, nav.stopName, nav.lat, nav.lng)
                             }
                         },
                     )
@@ -238,6 +238,28 @@ private fun NearbyLeading(badge: BadgeKind) {
         is BadgeKind.Subte -> SubteBadge(line = badge.line, size = 40.dp)
         BadgeKind.Bike -> ModeIconBadge(icon = Icons.Filled.DirectionsBike, fill = com.alandaitch.anden.ui.theme.BiciAccent)
         BadgeKind.Bus -> ModeIconBadge(icon = Icons.Filled.DirectionsBus, fill = Palette.brand)
+        is BadgeKind.BusLine -> BusLineBadge(lineShort = badge.lineShort)
+    }
+}
+
+// Badge cuadrado con el número de línea de colectivo (color determinístico).
+@Composable
+private fun BusLineBadge(lineShort: String) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+            .background(com.alandaitch.anden.data.model.BusLine.color(lineShort)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            lineShort,
+            color = Color.White,
+            fontWeight = FontWeight.Black,
+            fontSize = 15.sp,
+            maxLines = 1,
+            modifier = Modifier.padding(horizontal = 2.dp),
+        )
     }
 }
 
@@ -250,13 +272,14 @@ sealed interface BadgeKind {
     data class Subte(val line: SubteLine) : BadgeKind
     data object Bike : BadgeKind
     data object Bus : BadgeKind
+    data class BusLine(val lineShort: String) : BadgeKind
 }
 
 sealed interface NearbyNav {
     data class Tren(val stationId: Int) : NearbyNav
     data class Subte(val stationName: String, val routeId: String?) : NearbyNav
     data class Bici(val station: EcobiciStation) : NearbyNav
-    data class Bondi(val stopCode: String) : NearbyNav
+    data class Bondi(val stopId: String, val stopName: String, val lat: Double, val lng: Double) : NearbyNav
 }
 
 data class NearbyItem(

@@ -15,14 +15,14 @@ fun prop(key: String): String = (localProps.getProperty(key) ?: "").trim()
 
 android {
     namespace = "com.alandaitch.anden"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.alandaitch.anden"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 35
+        versionCode = 3
+        versionName = "1.1"
         buildConfigField("String", "BA_CLIENT_ID", "\"${prop("BA_CLIENT_ID")}\"")
         buildConfigField("String", "BA_CLIENT_SECRET", "\"${prop("BA_CLIENT_SECRET")}\"")
     }

@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DirectionsBus
 import androidx.compose.material.icons.rounded.DirectionsTransit
-import androidx.compose.material.icons.rounded.SignalWifiOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -38,17 +37,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.alandaitch.anden.data.catalog.ColectivoCatalog
-import com.alandaitch.anden.data.model.BusArrival
+import com.alandaitch.anden.data.model.BusArrivalOba
 import com.alandaitch.anden.data.model.BusLine
-import com.alandaitch.anden.data.model.BusStop
 import com.alandaitch.anden.data.net.ApiError
-import com.alandaitch.anden.data.net.BaApi
+import com.alandaitch.anden.data.net.ObaApi
 import com.alandaitch.anden.ui.components.CountdownText
-import com.alandaitch.anden.ui.components.DelayPill
 import com.alandaitch.anden.ui.components.EmptyState
 import com.alandaitch.anden.ui.components.ErrorState
 import com.alandaitch.anden.ui.components.GoButton
+import com.alandaitch.anden.ui.components.LiveDot
 import com.alandaitch.anden.ui.components.LoadingState
 import com.alandaitch.anden.ui.theme.Palette
 import com.alandaitch.anden.util.Formatting
@@ -61,40 +58,28 @@ private sealed interface ColectivoPhase {
     data object Loading : ColectivoPhase
     data object Ready : ColectivoPhase
     data object Empty : ColectivoPhase
-    data class Unavailable(val message: String) : ColectivoPhase
     data class Error(val message: String) : ColectivoPhase
 }
 
-// Tablero de arribos de una parada de colectivo. Auto-refresh 30s.
+// Tablero de arribos de una parada de colectivo (OneBusAway). Auto-refresh 30s.
 @Composable
-fun ColectivoStopBoardScreen(stopCode: String) {
+fun ColectivoStopBoardScreen(stopId: String, stopName: String, stopPoint: GeoPoint?) {
     val dark = isSystemInDarkTheme()
     val context = LocalContext.current
 
-    val stop: BusStop? = remember(stopCode) {
-        ColectivoCatalog.shared.stops.firstOrNull { it.code == stopCode }
-    }
-    val stopName = stop?.name ?: "Parada $stopCode"
-    val stopPoint: GeoPoint? = stop?.coordinate
+    var arrivals by remember(stopId) { mutableStateOf<List<BusArrivalOba>>(emptyList()) }
+    var phase by remember(stopId) { mutableStateOf<ColectivoPhase>(ColectivoPhase.Loading) }
+    var lastUpdated by remember(stopId) { mutableStateOf<Instant?>(null) }
+    var reloadKey by remember(stopId) { mutableIntStateOf(0) }
 
-    var arrivals by remember(stopCode) { mutableStateOf<List<BusArrival>>(emptyList()) }
-    var phase by remember(stopCode) { mutableStateOf<ColectivoPhase>(ColectivoPhase.Loading) }
-    var lastUpdated by remember(stopCode) { mutableStateOf<Instant?>(null) }
-    var reloadKey by remember(stopCode) { mutableIntStateOf(0) }
-
-    LaunchedEffect(stopCode, reloadKey) {
+    LaunchedEffect(stopId, reloadKey) {
         if (arrivals.isEmpty()) phase = ColectivoPhase.Loading
         while (true) {
             try {
-                val list = BaApi.shared.colectivoArrivals(stopCode)
+                val list = ObaApi.shared.stopArrivals(stopId)
                 arrivals = list
                 phase = if (list.isEmpty()) ColectivoPhase.Empty else ColectivoPhase.Ready
                 lastUpdated = Instant.now()
-            } catch (e: ApiError.ServiceUnavailable) {
-                arrivals = emptyList()
-                phase = ColectivoPhase.Unavailable(
-                    e.info ?: "El servicio de arribos de colectivos de la Ciudad no responde ahora."
-                )
             } catch (e: ApiError) {
                 if (arrivals.isEmpty()) phase = ColectivoPhase.Error(e.message ?: "Revisá tu conexión e intentá de nuevo.")
             } catch (e: Exception) {
@@ -117,7 +102,6 @@ fun ColectivoStopBoardScreen(stopCode: String) {
             item {
                 ColectivoHeader(
                     stopName = stopName,
-                    stopCode = stopCode,
                     phase = phase,
                     lastUpdated = lastUpdated,
                     dark = dark,
@@ -139,27 +123,6 @@ fun ColectivoStopBoardScreen(stopCode: String) {
                             actionTitle = "Reintentar",
                             onAction = { reloadKey++ }
                         )
-                    }
-
-                is ColectivoPhase.Unavailable ->
-                    item {
-                        Column(
-                            Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            EmptyState(
-                                icon = Icons.Rounded.SignalWifiOff,
-                                title = "Arribos no disponibles",
-                                message = p.message,
-                                actionTitle = "Reintentar",
-                                onAction = { reloadKey++ }
-                            )
-                            if (stopPoint != null) {
-                                Box(Modifier.padding(top = 4.dp)) {
-                                    GoButton(onClick = { MapsOpener.walk(context, stopPoint, stopName) })
-                                }
-                            }
-                        }
                     }
 
                 is ColectivoPhase.Error ->
@@ -187,7 +150,6 @@ fun ColectivoStopBoardScreen(stopCode: String) {
 @Composable
 private fun ColectivoHeader(
     stopName: String,
-    stopCode: String,
     phase: ColectivoPhase,
     lastUpdated: Instant?,
     dark: Boolean,
@@ -221,7 +183,7 @@ private fun ColectivoHeader(
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text("Parada $stopCode", color = Palette.textSecondary(dark), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                Text("Parada de colectivo", color = Palette.textSecondary(dark), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
             }
         }
 
@@ -266,10 +228,10 @@ private fun ColectivoHeader(
     }
 }
 
-// Fila de un arribo de colectivo: badge de línea + destino + countdown + demora.
+// Fila de un arribo de colectivo: badge de línea + destino + countdown + VIVO/prog.
 @Composable
-private fun ColectivoArrivalRow(arrival: BusArrival, dark: Boolean) {
-    val color = BusLine.color(arrival.lineName)
+private fun ColectivoArrivalRow(arrival: BusArrivalOba, dark: Boolean) {
+    val color = BusLine.color(arrival.lineShort)
     Row(
         Modifier
             .fillMaxWidth()
@@ -279,22 +241,29 @@ private fun ColectivoArrivalRow(arrival: BusArrival, dark: Boolean) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        ColectivoBusBadge(arrival.lineName, color)
+        ColectivoBusBadge(arrival.lineShort, color)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
-                arrival.destino?.let { "a $it" } ?: "Línea ${arrival.lineName}",
+                Formatting.busDestination(arrival.lineShort, arrival.headsign),
                 color = Palette.textPrimary(dark),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Text("Hora ${Formatting.clock(arrival.eta)}", color = Palette.textSecondary(dark), fontSize = 12.sp, fontWeight = FontWeight.Medium)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (arrival.isLive) {
+                    LiveDot(active = true, color = Palette.onTime, size = 6.dp)
+                    Text("En vivo", color = Palette.onTime, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                } else {
+                    Text("Programado", color = Palette.textSecondary(dark), fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                }
+                arrival.eta?.let {
+                    Text("· ${Formatting.clock(it)}", color = Palette.textSecondary(dark), fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                }
+            }
         }
-        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            CountdownText(secondsUntil = arrival.secondsUntil, big = false)
-            DelayPill(status = arrival.delay)
-        }
+        CountdownText(secondsUntil = arrival.secondsUntil, big = false)
     }
 }
 

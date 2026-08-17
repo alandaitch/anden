@@ -137,7 +137,11 @@ fun RootScreen() {
                     onOpenTren = goTren,
                     onOpenSubte = goSubte,
                     onOpenBici = { navController.navigate("bici") },
-                    onOpenBondi = { code -> navController.navigate("bondi/${Uri.encode(code)}") },
+                    onOpenBondi = { stopId, name, lat, lng ->
+                        navController.navigate(
+                            "bondi/${Uri.encode(stopId)}?name=${Uri.encode(name)}&lat=$lat&lng=$lng"
+                        )
+                    },
                     onComoLlego = { navController.navigate("comollego") },
                 )
             }
@@ -180,11 +184,20 @@ fun RootScreen() {
                 EcobiciScreen()
             }
             composable(
-                route = "bondi/{code}",
-                arguments = listOf(navArgument("code") { type = NavType.StringType }),
+                route = "bondi/{stopId}?name={name}&lat={lat}&lng={lng}",
+                arguments = listOf(
+                    navArgument("stopId") { type = NavType.StringType },
+                    navArgument("name") { type = NavType.StringType; defaultValue = "" },
+                    navArgument("lat") { type = NavType.StringType; defaultValue = "" },
+                    navArgument("lng") { type = NavType.StringType; defaultValue = "" },
+                ),
             ) { entry ->
-                val code = entry.arguments?.getString("code").orEmpty()
-                ColectivoStopBoardScreen(stopCode = code)
+                val stopId = entry.arguments?.getString("stopId").orEmpty()
+                val name = entry.arguments?.getString("name").orEmpty()
+                val lat = entry.arguments?.getString("lat")?.toDoubleOrNull()
+                val lng = entry.arguments?.getString("lng")?.toDoubleOrNull()
+                val point = if (lat != null && lng != null) com.alandaitch.anden.util.GeoPoint(lat, lng) else null
+                ColectivoStopBoardScreen(stopId = stopId, stopName = name.ifEmpty { "Parada" }, stopPoint = point)
             }
             composable("comollego") {
                 ComoLlegoScreen(onBack = { navController.popBackStack() })
