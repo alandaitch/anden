@@ -9,8 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
@@ -31,6 +36,7 @@ private const val STOP_ARGB = 0xFF242C4F.toInt() // brand
 
 // Mini-mapa "tu parada + el vehículo viniendo". Solo visual (no interactivo).
 // Se auto-encuadra para mostrar la parada y, si hay GPS, el coche que se acerca.
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MiniMapView(
     stop: GeoPoint,
@@ -51,12 +57,14 @@ fun MiniMapView(
             zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
             isHorizontalMapRepetitionEnabled = false
             isVerticalMapRepetitionEnabled = false
-            // No interactivo: es un vistazo.
-            setOnTouchListener { _, _ -> true }
+            setMultiTouchControls(false)
             controller.setZoom(15.5)
             controller.setCenter(org.osmdroid.util.GeoPoint(stop.lat, stop.lng))
         }
     }
+    // No interactivo: pointerInteropFilter{false} deja que el mapa NO reciba el touch,
+    // así el LazyColumn padre puede scrollear aunque el drag arranque sobre el mini-mapa.
+    var laidOut by remember { mutableStateOf(false) }
 
     val owner = LocalLifecycleOwner.current
     DisposableEffect(owner) {
@@ -76,13 +84,17 @@ fun MiniMapView(
 
     AndroidView(
         factory = { mapView },
-        modifier = modifier.fillMaxWidth().height(heightDp.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(heightDp.dp)
+            .pointerInteropFilter { false },
         update = { mv ->
             mv.overlays.clear()
             addDot(mv, stop, STOP_ARGB, 13f, 2.5f, density)
             if (vehicle != null) addDot(mv, vehicle, vehicleColorArgb, 17f, 3f, density)
             mv.invalidate()
-            mv.post {
+
+            fun applyZoom() {
                 if (vehicle != null && Geo.distanceMeters(stop, vehicle) > 120.0) {
                     val box = BoundingBox.fromGeoPoints(
                         listOf(
@@ -94,6 +106,15 @@ fun MiniMapView(
                 } else {
                     mv.controller.setZoom(16.0)
                     mv.controller.setCenter(org.osmdroid.util.GeoPoint(stop.lat, stop.lng))
+                }
+            }
+            // zoomToBoundingBox necesita el layout ya hecho (si no, width=0 -> zoom NaN).
+            if (laidOut) {
+                applyZoom()
+            } else {
+                mv.addOnFirstLayoutListener { _, _, _, _, _ ->
+                    laidOut = true
+                    applyZoom()
                 }
             }
         },

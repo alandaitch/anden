@@ -100,10 +100,14 @@ actor ObaClient {
     }
 
     // Posición GPS del coche SOLO si OBA la da en vivo (tripStatus.predicted).
-    // Prefiere position (proyectada al recorrido); si no, el último GPS crudo.
+    // Prefiere position (proyectada al recorrido); si viene inválida (0,0 o nula),
+    // cae al último GPS crudo. Valida cada candidato por separado, no solo presencia.
     private static func liveVehicleCoordinate(_ a: ObaArrivalDTO) -> CLLocationCoordinate2D? {
         guard let ts = a.tripStatus, (ts.predicted ?? false) else { return nil }
-        let c = ts.position ?? ts.lastKnownLocation
+        return validCoord(ts.position) ?? validCoord(ts.lastKnownLocation)
+    }
+
+    private static func validCoord(_ c: ObaCoordDTO?) -> CLLocationCoordinate2D? {
         guard let lat = c?.lat, let lon = c?.lon, lat != 0, lon != 0 else { return nil }
         return CLLocationCoordinate2D(latitude: lat, longitude: lon)
     }

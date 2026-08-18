@@ -59,6 +59,15 @@ private struct LegacyFavoriteStation: Codable {
     var addedAt: Date
 }
 
+// Decodifica un elemento tolerando fallas: value == nil si ese elemento no decodifica.
+private struct FailableDecodable<T: Decodable>: Decodable {
+    let value: T?
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        value = try? container.decode(T.self)
+    }
+}
+
 // Favoritos multi-modo con rol de contexto. Persiste en App Group.
 @Observable
 final class FavoritesStore {
@@ -78,26 +87,47 @@ final class FavoritesStore {
     }
 
     private func load() {
-        if let data = defaults.data(forKey: key),
-           let decoded = try? JSONDecoder().decode([FavoriteItem].self, from: data) {
-            items = decoded
+        // Si v2 existe es la fuente de verdad. Si el decode falla NO migramos v1
+        // por encima (pisaría datos nuevos): dejamos vacío y no tocamos el disco.
+        if let data = defaults.data(forKey: key) {
+            if let decoded = try? JSONDecoder().decode([FavoriteItem].self, from: data) {
+                items = decoded
+            }
             return
         }
         migrateLegacy()
     }
 
     // Migra los favoritos v1 (solo trenes) al modelo nuevo y persiste en v2.
+    // Solo corre cuando no existe v2. Decodifica elemento por elemento: un registro
+    // corrupto no tira toda la migración.
     private func migrateLegacy() {
-        guard let data = defaults.data(forKey: legacyKey),
-              let old = try? JSONDecoder().decode([LegacyFavoriteStation].self, from: data) else { return }
-        items = old.compactMap { legacy in
-            guard let st = catalog.station(id: legacy.stationId) else { return nil }
-            return FavoriteItem(mode: .tren, refId: String(legacy.stationId),
+        guard let data = defaults.data(forKey: legacyKey) else { return }
+        let legacy: [LegacyFavoriteStation]
+        if let all = try? JSONDecoder().decode([LegacyFavoriteStation].self, from: data) {
+            legacy = all
+        } else if let raw = try? JSONDecoder().decode([FailableDecodable<LegacyFavoriteStation>].self, from: data) {
+            legacy = raw.compactMap { $0.value }
+        } else {
+            legacy = []
+        }
+        if legacy.isEmpty {
+            // v1 ilegible o vacío: limpiamos para no reintentar en cada arranque.
+            defaults.removeObject(forKey: legacyKey)
+            return
+        }
+        let migrated: [FavoriteItem] = legacy.compactMap { l in
+            guard let st = catalog.station(id: l.stationId) else { return nil }
+            return FavoriteItem(mode: .tren, refId: String(l.stationId),
                                 name: st.nombre, lat: st.lat, lng: st.lng,
                                 lineLabel: st.line.shortCode, lineColorHex: st.line.colorHex,
-                                routeId: nil, role: legacy.role, addedAt: legacy.addedAt)
+                                routeId: nil, role: l.role, addedAt: l.addedAt)
         }
-        if !items.isEmpty { persist() }
+        // Ninguno resolvió (¿catálogo no cargado?): no persistas ni borres, reintentá.
+        if migrated.isEmpty { return }
+        items = migrated
+        persist()
+        defaults.removeObject(forKey: legacyKey)
     }
 
     private func persist() {

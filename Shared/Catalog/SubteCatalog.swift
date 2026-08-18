@@ -78,4 +78,16 @@ final class SubteCatalog {
     func station(name: String) -> SubteStation? {
         byNormalizedName[StationCatalog.normalize(name)]
     }
+
+    // Estación por nombre + línea. Necesario porque hay nombres compartidos entre
+    // líneas (Callao B/D, Pueyrredón B/D, Retiro C/E). Fallback: solo por nombre.
+    func station(name: String, line: SubteLine?) -> SubteStation? {
+        guard let line else { return station(name: name) }
+        let norm = StationCatalog.normalize(name)
+        let match = all.first { st in
+            st.line.routeId == line.routeId &&
+            ([st.name] + st.aliases).contains { StationCatalog.normalize($0) == norm }
+        }
+        return match ?? station(name: name)
+    }
 }

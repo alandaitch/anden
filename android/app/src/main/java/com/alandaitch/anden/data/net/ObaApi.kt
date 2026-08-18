@@ -103,12 +103,13 @@ class ObaApi(
             val millis = if (predicted) a.predictedArrivalTime!! else (a.scheduledArrivalTime ?: return@mapNotNull null)
             val etaSec = millis / 1000
             val secondsUntil = (etaSec - now).toInt()
-            if (secondsUntil < 0) return@mapNotNull null
+            // Tolerancia -45s (paridad con iOS): no ocultar el coche justo al llegar.
+            if (secondsUntil < -45) return@mapNotNull null
             BusArrivalOba(
                 lineShort = short,
                 headsign = a.tripHeadsign ?: "",
                 eta = Instant.ofEpochSecond(etaSec),
-                secondsUntil = secondsUntil,
+                secondsUntil = maxOf(0, secondsUntil),
                 isLive = predicted,
                 vehicle = liveVehicle(a)
             )
@@ -116,13 +117,17 @@ class ObaApi(
     }
 
     // Posición GPS del coche SOLO si OBA la da en vivo (tripStatus.predicted).
-    // Prefiere position (proyectada al recorrido); si no, el último GPS crudo.
+    // Prefiere position (proyectada al recorrido); si viene inválida (0,0 o nula),
+    // cae al último GPS crudo. Valida cada candidato por separado, no solo presencia.
     private fun liveVehicle(a: ObaArrival): GeoPoint? {
         val ts = a.tripStatus ?: return null
         if (ts.predicted != true) return null
-        val c = ts.position ?: ts.lastKnownLocation ?: return null
-        val lat = c.lat ?: return null
-        val lon = c.lon ?: return null
+        return validCoord(ts.position) ?: validCoord(ts.lastKnownLocation)
+    }
+
+    private fun validCoord(c: ObaCoord?): GeoPoint? {
+        val lat = c?.lat ?: return null
+        val lon = c?.lon ?: return null
         if (lat == 0.0 || lon == 0.0) return null
         return GeoPoint(lat, lon)
     }

@@ -108,13 +108,42 @@ extension WidgetSnapshot {
     // y persiste su snapshot. La app tiene catálogo y claves; el widget no.
     static func refreshFromApp() async {
         guard let fav = FavoritesStore.shared.contextualPrimary(among: [.tren, .subte, .bondi]) else {
+            // Sin favorito con arribos: limpiamos para no mostrar uno viejo.
+            clear()
             WidgetCenter.shared.reloadAllTimelines()
             return
         }
         if let snapshot = await buildSnapshot(for: fav) {
             write(snapshot)
+        } else {
+            // El fetch falló. Si el favorito CAMBIÓ, no dejamos el snapshot anterior:
+            // escribimos la parada nueva sin arribos (el widget muestra "sin arribos").
+            // Si es el mismo favorito, conservamos el último snapshot bueno.
+            let prev = read()
+            if prev?.mode != fav.mode || prev?.refId != fav.refId {
+                write(placeholder(for: fav))
+            }
         }
         WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    // Borra el snapshot persistido (cuando no hay ningún favorito con arribos).
+    static func clear() {
+        store.removeObject(forKey: key)
+    }
+
+    // Snapshot de una parada sin arribos (para no mostrar el favorito anterior).
+    private static func placeholder(for fav: FavoriteItem) -> WidgetSnapshot {
+        WidgetSnapshot(
+            mode: fav.mode,
+            refId: fav.refId,
+            stationId: fav.mode == .tren ? (Int(fav.refId) ?? 0) : 0,
+            stationName: fav.name,
+            lineShortCode: fav.mode == .bondi ? "" : (fav.lineLabel ?? ""),
+            lineColorHex: fav.lineColorHex ?? "#3A4A63",
+            generatedAt: Date(),
+            arrivals: []
+        )
     }
 
     // Arma el snapshot pidiendo arribos al cliente correcto según el modo.

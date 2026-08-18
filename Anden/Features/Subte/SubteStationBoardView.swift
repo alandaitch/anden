@@ -125,7 +125,7 @@ struct SubteStationBoardView: View {
     }
 
     private var stationName: String { vm.stationName }
-    private var subteStation: SubteStation? { SubteCatalog.shared.station(name: stationName) }
+    private var subteStation: SubteStation? { SubteCatalog.shared.station(name: stationName, line: vm.line) }
     private var isFavorite: Bool { subteStation.map { favorites.isFavorite(.subte, $0.id) } ?? false }
 
     var body: some View {

@@ -24,8 +24,9 @@ struct StationBoardView: View {
         }
     }
     // El próximo tren con GPS reportado (falta en ~46% de los arribos).
+    // Respeta el chip de sentido seleccionado: mira los arribos visibles, no todos.
     private var incomingTrain: CLLocationCoordinate2D? {
-        vm.arrivals.first(where: { $0.trainLocation != nil })?.trainLocation
+        vm.displayGroups.flatMap(\.arrivals).first(where: { $0.trainLocation != nil })?.trainLocation
     }
 
     var body: some View {

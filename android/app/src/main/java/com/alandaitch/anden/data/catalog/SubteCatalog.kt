@@ -77,6 +77,17 @@ class SubteCatalog(context: Context = AndenApp.appContext) {
     // Estación por nombre, matcheando nombre normalizado + aliases. null si no matchea.
     fun station(name: String): SubteStation? = byNormalizedName[StationCatalog.normalize(name)]
 
+    // Estación por nombre + línea. Necesario porque hay nombres compartidos entre
+    // líneas (Callao B/D, Pueyrredón B/D, Retiro C/E). Fallback: solo por nombre.
+    fun station(name: String, routeId: String?): SubteStation? {
+        if (routeId == null) return station(name)
+        val norm = StationCatalog.normalize(name)
+        return all.firstOrNull { st ->
+            st.line.routeId.equals(routeId, ignoreCase = true) &&
+                (listOf(st.name) + st.aliases).any { StationCatalog.normalize(it) == norm }
+        } ?: station(name)
+    }
+
     companion object {
         val shared: SubteCatalog by lazy { SubteCatalog() }
     }

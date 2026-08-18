@@ -84,7 +84,7 @@ fun SubteStationBoardScreen(stationName: String, routeId: String?) {
     val dark = isSystemInDarkTheme()
     val line = remember(routeId) { routeId?.let { SubteLine.line(it) } }
 
-    val subteStation = remember(stationName) { com.alandaitch.anden.data.catalog.SubteCatalog.shared.station(stationName) }
+    val subteStation = remember(stationName, routeId) { com.alandaitch.anden.data.catalog.SubteCatalog.shared.station(stationName, routeId) }
     val favs by com.alandaitch.anden.data.store.FavoritesStore.shared.itemsFlow.collectAsState()
     val isFav = subteStation != null && favs.any {
         it.mode == com.alandaitch.anden.data.store.FavoriteMode.SUBTE && it.refId == subteStation.id

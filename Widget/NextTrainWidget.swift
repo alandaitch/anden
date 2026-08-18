@@ -301,8 +301,13 @@ struct CircularWidgetView: View {
     var body: some View {
         let next = snapshot.arrivals[0]
         VStack(spacing: 0) {
-            Text(snapshot.lineShortCode)
-                .font(.anden(11, weight: .heavy))
+            if snapshot.lineShortCode.isEmpty {
+                Image(systemName: snapshot.modeIcon)
+                    .font(.system(size: 11, weight: .bold))
+            } else {
+                Text(snapshot.lineShortCode)
+                    .font(.anden(11, weight: .heavy))
+            }
             Text(next.eta, style: .timer)
                 .font(.andenCountdown(13))
                 .lineLimit(1)

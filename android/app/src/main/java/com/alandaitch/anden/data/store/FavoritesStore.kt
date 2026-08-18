@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonArray
 import java.time.Instant
 import java.util.Calendar
 
@@ -86,17 +88,31 @@ class FavoritesStore(
     }
 
     private fun load() {
-        prefs.getString(key, null)?.let { data ->
-            runCatching { json.decodeFromString<List<FavoriteItem>>(data) }
-                .getOrNull()?.let { _items.value = it; return }
+        // Si v2 existe es la fuente de verdad. Si el decode falla NO migramos v1
+        // por encima (pisaría datos nuevos): dejamos vacío y no tocamos el disco.
+        val v2 = prefs.getString(key, null)
+        if (v2 != null) {
+            runCatching { json.decodeFromString<List<FavoriteItem>>(v2) }.getOrNull()?.let { _items.value = it }
+            return
         }
         migrateLegacy()
     }
 
     // Migra los favoritos v1 (solo trenes) al modelo nuevo y persiste en v2.
+    // Solo corre cuando no existe v2. Decodifica elemento por elemento: un registro
+    // corrupto no tira toda la migración.
     private fun migrateLegacy() {
         val data = prefs.getString(legacyKey, null) ?: return
-        val old = runCatching { json.decodeFromString<List<LegacyFavoriteStation>>(data) }.getOrNull() ?: return
+        val old = runCatching {
+            json.parseToJsonElement(data).jsonArray.mapNotNull { el ->
+                runCatching { json.decodeFromJsonElement<LegacyFavoriteStation>(el) }.getOrNull()
+            }
+        }.getOrNull()
+        if (old.isNullOrEmpty()) {
+            // v1 ilegible o vacío: limpiamos para no reintentar en cada arranque.
+            prefs.edit().remove(legacyKey).apply()
+            return
+        }
         val migrated = old.mapNotNull { legacy ->
             val st = catalog.station(legacy.stationId) ?: return@mapNotNull null
             FavoriteItem(
@@ -104,10 +120,11 @@ class FavoritesStore(
                 st.line.shortCode, st.line.colorHex, role = legacy.role, addedAtEpoch = legacy.addedAtEpoch,
             )
         }
-        if (migrated.isNotEmpty()) {
-            _items.value = migrated
-            persist()
-        }
+        // Ninguno resolvió (¿catálogo no cargado?): no persistas ni borres, reintentá.
+        if (migrated.isEmpty()) return
+        _items.value = migrated
+        persist()
+        prefs.edit().remove(legacyKey).apply()
     }
 
     private fun persist() {
