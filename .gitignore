@@ -35,3 +35,7 @@ Payload/
 
 # API key de Transporte BA (NO commitear)
 Anden/Resources/Secrets.plist
+
+# Vercel
+web/.vercel
+.vercel

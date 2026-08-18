@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#242C4F" />
+  <title>Andén — transporte del AMBA en vivo</title>
+  <meta name="description" content="Arribos en tiempo real de trenes, subte y colectivos del AMBA (Buenos Aires). Sin instalar nada." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23242C4F'/%3E%3Cg fill='white'%3E%3Crect x='30' y='24' width='40' height='38' rx='8'/%3E%3Crect x='36' y='30' width='12' height='12' rx='2' fill='%23242C4F'/%3E%3Crect x='52' y='30' width='12' height='12' rx='2' fill='%23242C4F'/%3E%3Ccircle cx='39' cy='54' r='4' fill='%23242C4F'/%3E%3Ccircle cx='61' cy='54' r='4' fill='%23242C4F'/%3E%3Crect x='34' y='64' width='10' height='12' rx='2'/%3E%3Crect x='56' y='64' width='10' height='12' rx='2'/%3E%3C/g%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <button id="backBtn" class="iconbtn hidden" aria-label="Volver">‹</button>
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name">Andén</span>
+        <span class="brand-tag">web</span>
+      </div>
+      <span class="topbar-spacer"></span>
+    </header>
+
+    <main id="view"></main>
+
+    <nav class="tabbar">
+      <button class="tab" data-view="cerca">
+        <span class="tab-ico" data-ico="near"></span><span>Cerca</span>
+      </button>
+      <button class="tab" data-view="favoritos">
+        <span class="tab-ico" data-ico="star"></span><span>Favoritos</span>
+      </button>
+      <button class="tab" data-view="mapa">
+        <span class="tab-ico" data-ico="map"></span><span>Mapa</span>
+      </button>
+    </nav>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>
