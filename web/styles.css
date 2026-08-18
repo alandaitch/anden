@@ -90,7 +90,8 @@ body {
 .row:active { transform: scale(.995); }
 .badge {
   width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
-  display: grid; place-items: center; color: #fff; font-weight: 900; font-size: 17px;
+  display: grid; place-items: center; color: #fff; font-weight: 900; font-size: 16px;
+  overflow: hidden; white-space: nowrap; letter-spacing: -.02em;
 }
 .badge svg { width: 24px; height: 24px; fill: #fff; }
 .row-main { flex: 1; min-width: 0; }

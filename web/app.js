@@ -51,6 +51,15 @@ function busColor(short) {
 const BICI_COLOR = '#0FA3A3';
 const BRAND = '#242C4F';
 
+// OneBusAway a veces trae el ramal completo en routeShortName ("24 2 Lynch").
+// El badge muestra solo el número de línea: primer token + una letra suelta ("100 X" -> "100X").
+function busLineNumber(short) {
+  const parts = String(short || '').trim().split(/\s+/);
+  let b = parts[0] || String(short || '');
+  if (parts[1] && /^[A-Za-z]$/.test(parts[1])) b += parts[1];
+  return b;
+}
+
 /* ─────────── Íconos SVG ─────────── */
 const SVG = {
   train: '<svg viewBox="0 0 24 24"><path d="M12 2c-4 0-8 .5-8 4v9.5A2.5 2.5 0 0 0 6.5 18L5 19.5V20h2l2-2h6l2 2h2v-.5L17.5 18a2.5 2.5 0 0 0 2.5-2.5V6c0-3.5-4-4-8-4zM7.5 15A1.5 1.5 0 1 1 9 13.5 1.5 1.5 0 0 1 7.5 15zm9 0a1.5 1.5 0 1 1 1.5-1.5 1.5 1.5 0 0 1-1.5 1.5zM18 10H6V6h12z"/></svg>',
@@ -416,10 +425,11 @@ async function collectBondi(rows) {
   let lines = [];
   try { lines = await nearbyBondiLines(S.loc); } catch (e) {}
   for (const l of lines.slice(0, 8)) {
-    const color = busColor(l.short);
+    const badge = busLineNumber(l.short);
+    const color = busColor(badge);
     rows.push({
-      mode: 'bondi', id: l.stop.id + '|' + l.short + '|' + l.dest, title: l.dest ? 'a ' + l.dest.replace(/^a\s+/i, '') : 'Línea ' + l.short,
-      d: l.d, badgeText: l.short, badgeColor: color, tag: 'Colectivo', tagColor: color,
+      mode: 'bondi', id: l.stop.id + '|' + l.short + '|' + l.dest, title: l.dest ? 'a ' + l.dest.replace(/^a\s+/i, '') : 'Línea ' + badge,
+      d: l.d, badgeText: badge, badgeColor: color, tag: 'Colectivo', tagColor: color,
       sub: etaText(l.secs) + (l.live ? ' en vivo' : ' prog') + ' · ' + prettyStop(l.stop.name), subCls: l.live ? 'live' : 'prog',
       lat: l.stop.lat, lng: l.stop.lng,
       open: () => go('board', { mode: 'bondi', id: l.stop.id, name: prettyStop(l.stop.name), lat: l.stop.lat, lng: l.stop.lng }),
@@ -558,11 +568,11 @@ async function boardBondi(stopId, stop, list) {
   list.innerHTML = '';
   if (!arr.length) { list.appendChild(stateBox('Sin colectivos ahora', 'No hay arribos informados para esta parada.')); }
   const incoming = arr.find((a) => a.veh);
-  const color = incoming ? busColor(incoming.short) : BRAND;
+  const color = incoming ? busColor(busLineNumber(incoming.short)) : BRAND;
   drawMiniMap(stop, incoming ? incoming.veh : null, [], color, SVG.bus);
   if (incoming && incoming.tripId) tripShape(incoming.tripId).then((r) => { if (r.length && S.map) drawRoute(r, color); });
   for (const a of arr.slice(0, 10)) {
-    list.appendChild(arrRow((a.short ? a.short + ' · ' : '') + 'a ' + a.dest.replace(/^a\s+/i, ''), a.secs, liveDotHtml(a.live)));
+    list.appendChild(arrRow((a.short ? busLineNumber(a.short) + ' · ' : '') + 'a ' + a.dest.replace(/^a\s+/i, ''), a.secs, liveDotHtml(a.live)));
   }
 }
 async function boardBici(id, list) {
@@ -581,11 +591,19 @@ function destroyMap() { if (S.map) { S.map.remove(); S.map = null; } S._route = 
 function osmLayer() {
   return L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' });
 }
+// Parada: pin clásico (gota) con centro blanco, anclado en la punta.
 function stopDivIcon(color) {
-  return L.divIcon({ className: '', html: `<div style="width:26px;height:26px;border-radius:8px;background:#fff;border:2.5px solid ${color};display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.3)"><div style="width:9px;height:9px;border-radius:9px;background:${color}"></div></div>`, iconSize: [26, 26], iconAnchor: [13, 13] });
+  const html = `<svg width="30" height="40" viewBox="0 0 30 40" style="filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))"><path d="M15 0C6.7 0 0 6.7 0 15c0 10.5 12.4 22.6 14.1 24.2.5.5 1.3.5 1.8 0C17.6 37.6 30 25.5 30 15 30 6.7 23.3 0 15 0z" fill="${color}"/><circle cx="15" cy="15" r="6" fill="#fff"/></svg>`;
+  return L.divIcon({ className: '', html, iconSize: [30, 40], iconAnchor: [15, 40] });
 }
-function vehDivIcon(color) {
-  return L.divIcon({ className: '', html: `<div style="width:22px;height:22px;border-radius:22px;background:${color};border:2px solid #fff;box-shadow:0 0 0 6px ${color}44"></div>`, iconSize: [22, 22], iconAnchor: [11, 11] });
+// Vehículo: círculo del color con el ícono (bondi/tren) blanco + glow.
+function vehDivIcon(color, glyph) {
+  const g = String(glyph || '').replace('<svg ', '<svg fill="#fff" width="17" height="17" style="display:block" ');
+  const html = `<div style="position:relative;width:34px;height:34px">
+    <div style="position:absolute;inset:0;border-radius:50%;background:${color};opacity:.22"></div>
+    <div style="position:absolute;inset:4px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4);display:grid;place-items:center">${g}</div>
+  </div>`;
+  return L.divIcon({ className: '', html, iconSize: [34, 34], iconAnchor: [17, 17] });
 }
 function userDivIcon() {
   return L.divIcon({ className: '', html: `<div style="width:16px;height:16px;border-radius:16px;background:#2D7DF6;border:2px solid #fff;box-shadow:0 0 0 5px #2D7DF633"></div>`, iconSize: [16, 16], iconAnchor: [8, 8] });
@@ -599,7 +617,7 @@ function drawMiniMap(stop, veh, route, color, ico) {
   L.marker([stop.lat, stop.lng], { icon: stopDivIcon(color) }).addTo(map);
   if (S.loc) L.marker([S.loc.lat, S.loc.lng], { icon: userDivIcon() }).addTo(map);
   const bounds = [[stop.lat, stop.lng]];
-  if (veh) { L.marker([veh.lat, veh.lng], { icon: vehDivIcon(color) }).addTo(map); bounds.push([veh.lat, veh.lng]); }
+  if (veh) { L.marker([veh.lat, veh.lng], { icon: vehDivIcon(color, ico), zIndexOffset: 1000 }).addTo(map); bounds.push([veh.lat, veh.lng]); }
   const fit = () => {
     map.invalidateSize();
     if (bounds.length > 1) map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
@@ -650,7 +668,7 @@ async function hydrateFavSub(f, node) {
     let text = null, cls = 'live', badgeLine = null;
     if (f.mode === 'tren') { const a = (await trainArrivals(f.id))[0]; if (a) text = etaText(a.secs) + (a.dest ? ' · a ' + a.dest : ''); }
     else if (f.mode === 'subte') { const a = (await subteArrivals(f.name))[0]; if (a) text = etaText(a.secs) + (a.dest ? ' · a ' + a.dest : ''); }
-    else if (f.mode === 'bondi') { const a = (await bondiArrivals(f.id))[0]; if (a) { text = etaText(a.secs) + (a.live ? ' en vivo' : ' prog'); badgeLine = a.short; } }
+    else if (f.mode === 'bondi') { const a = (await bondiArrivals(f.id))[0]; if (a) { text = etaText(a.secs) + (a.live ? ' en vivo' : ' prog'); badgeLine = busLineNumber(a.short); } }
     else if (f.mode === 'bici') { const sts = await biciStations(); const s = sts.find((x) => x.id === f.id); if (s) { text = s.bikes + ' bicis · ' + s.docks + ' anclajes'; } }
     if (text) {
       let subEl = $('.row-sub', node);
