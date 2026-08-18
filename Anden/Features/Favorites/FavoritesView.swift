@@ -9,6 +9,8 @@ struct FavoritesView: View {
 
     // Subtítulo "próximo arribo" por favorito (item.id -> texto).
     @State private var subtitles: [String: String] = [:]
+    // Colectivo: número de línea del próximo arribo (item.id -> "26A"), para el badge.
+    @State private var busLines: [String: String] = [:]
     // EcoBici en vivo por id, para navegar y mostrar disponibilidad.
     @State private var ecobiciLive: [String: EcobiciStation] = [:]
     @State private var removalTrigger = 0
@@ -71,7 +73,7 @@ struct FavoritesView: View {
 
     private func favoriteLink(_ item: FavoriteItem) -> some View {
         NavigationLink(value: item) {
-            FavoriteRow(item: item, subtitle: subtitles[item.id])
+            FavoriteRow(item: item, subtitle: subtitles[item.id], busLine: busLines[item.id])
                 .padding(.vertical, 4)
         }
         .listRowBackground(Palette.elevated)
@@ -171,34 +173,35 @@ struct FavoritesView: View {
             ecobiciLive = byId
         }
 
-        await withTaskGroup(of: (String, String?).self) { group in
+        await withTaskGroup(of: (String, String?, String?).self) { group in
             for item in items {
                 group.addTask {
-                    (item.id, await Self.subtitle(for: item))
+                    await Self.rowData(for: item)
                 }
             }
-            for await (id, text) in group {
+            for await (id, text, line) in group {
                 if let text { subtitles[id] = text }
+                if let line { busLines[id] = line }
             }
         }
     }
 
-    // Próximo arribo (o disponibilidad, en bici) resuelto por el cliente de cada modo.
-    private static func subtitle(for item: FavoriteItem) async -> String? {
+    // Devuelve (id, subtítulo, número de línea). La línea solo aplica a colectivo.
+    private static func rowData(for item: FavoriteItem) async -> (String, String?, String?) {
         switch item.mode {
         case .tren:
             guard let id = Int(item.refId),
-                  let a = try? await SofseClient.shared.arrivals(stationId: id, limit: 1).first else { return nil }
-            return "\(Formatting.etaText(secondsUntil: a.secondsUntil)) · a \(a.destinationName)"
+                  let a = try? await SofseClient.shared.arrivals(stationId: id, limit: 1).first else { return (item.id, nil, nil) }
+            return (item.id, "\(Formatting.etaText(secondsUntil: a.secondsUntil)) · a \(a.destinationName)", nil)
         case .subte:
-            guard let a = try? await BAClient.shared.subteArrivals(stationName: item.name).first else { return nil }
-            return "\(Formatting.etaText(secondsUntil: a.secondsUntil)) · a \(a.destinationName)"
+            guard let a = try? await BAClient.shared.subteArrivals(stationName: item.name).first else { return (item.id, nil, nil) }
+            return (item.id, "\(Formatting.etaText(secondsUntil: a.secondsUntil)) · a \(a.destinationName)", nil)
         case .bondi:
-            guard let a = try? await ObaClient.shared.stopArrivals(stopId: item.refId).first else { return nil }
+            guard let a = try? await ObaClient.shared.stopArrivals(stopId: item.refId).first else { return (item.id, nil, nil) }
             let estado = a.isLive ? "en vivo" : "prog"
-            return "\(a.lineShort) · \(Formatting.etaText(secondsUntil: a.secondsUntil)) \(estado)"
+            return (item.id, "\(Formatting.etaText(secondsUntil: a.secondsUntil)) \(estado)", a.lineShort)
         case .bici:
-            return nil
+            return (item.id, nil, nil)
         }
     }
 }
@@ -208,13 +211,19 @@ struct FavoritesView: View {
 private struct FavoriteRow: View {
     let item: FavoriteItem
     let subtitle: String?
+    var busLine: String? = nil
 
     private var accent: Color {
         switch item.mode {
         case .tren, .subte: return Color(hex: item.lineColorHex ?? "#3A4A63")
-        case .bondi: return Palette.brand
+        case .bondi: return busLine.map { BusLine.color(for: $0) } ?? Palette.brand
         case .bici: return Color(hex: "#0FA3A3")
         }
+    }
+
+    // Colectivo: el badge lleva el número de la línea del próximo arribo.
+    private var badgeLabel: String? {
+        item.mode == .bondi ? busLine : item.lineLabel
     }
 
     private var modeTag: String {
@@ -269,7 +278,7 @@ private struct FavoriteRow: View {
             .fill(accent)
             .frame(width: 46, height: 46)
             .overlay {
-                if let label = item.lineLabel, !label.isEmpty {
+                if let label = badgeLabel, !label.isEmpty {
                     Text(label)
                         .font(.anden(18, weight: .heavy))
                         .foregroundStyle(.white)

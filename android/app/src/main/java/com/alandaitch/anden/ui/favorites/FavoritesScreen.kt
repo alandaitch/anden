@@ -70,6 +70,8 @@ fun FavoritesScreen(
     val store = remember { FavoritesStore.shared }
     val favs by store.itemsFlow.collectAsState()
     val subtitles = remember { mutableStateMapOf<String, String>() }
+    // En colectivo el badge muestra el número de la línea del próximo arribo.
+    val busLines = remember { mutableStateMapOf<String, String>() }
 
     // Trae el próximo arribo (o disponibilidad, en bici) de cada favorito.
     LaunchedEffect(favs) {
@@ -80,7 +82,18 @@ fun FavoritesScreen(
             } else emptyMap()
         supervisorScope {
             favs.forEach { item ->
-                launch { subtitleFor(item, ecobici)?.let { subtitles[item.id] = it } }
+                launch {
+                    if (item.mode == FavoriteMode.BONDI) {
+                        val a = runCatching { ObaApi.shared.stopArrivals(item.refId).firstOrNull() }.getOrNull()
+                        if (a != null) {
+                            busLines[item.id] = a.lineShort
+                            val estado = if (a.isLive) "en vivo" else "prog"
+                            subtitles[item.id] = "${Formatting.etaText(a.secondsUntil)} $estado"
+                        }
+                    } else {
+                        subtitleFor(item, ecobici)?.let { subtitles[item.id] = it }
+                    }
+                }
             }
         }
     }
@@ -114,7 +127,7 @@ fun FavoritesScreen(
                         SectionHeader(title = "Del momento", subtitle = roleText(primary.role))
                     }
                     item(key = "primary-${primary.id}") {
-                        FavoriteRow(primary, subtitles[primary.id], colors) { open(primary) }
+                        FavoriteRow(primary, subtitles[primary.id], busLines[primary.id], colors) { open(primary) }
                     }
                 }
                 item {
@@ -122,7 +135,7 @@ fun FavoritesScreen(
                     Spacer(Modifier.width(0.dp))
                 }
                 items(favs, key = { it.id }) { item ->
-                    FavoriteRow(item, subtitles[item.id], colors) { open(item) }
+                    FavoriteRow(item, subtitles[item.id], busLines[item.id], colors) { open(item) }
                 }
             }
         }
@@ -133,10 +146,17 @@ fun FavoritesScreen(
 private fun FavoriteRow(
     item: FavoriteItem,
     subtitle: String?,
+    busLine: String?,
     colors: com.alandaitch.anden.ui.theme.AndenColors,
     onClick: () -> Unit,
 ) {
-    val accent = accentFor(item)
+    // Colectivo: el badge lleva el número de la línea del próximo arribo, con su color.
+    val badgeLabel = if (item.mode == FavoriteMode.BONDI) busLine else item.lineLabel
+    val accent = if (item.mode == FavoriteMode.BONDI && busLine != null) {
+        com.alandaitch.anden.data.model.BusLine.color(busLine)
+    } else {
+        accentFor(item)
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -145,7 +165,7 @@ private fun FavoriteRow(
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        FavoriteBadge(item, accent)
+        FavoriteBadge(item.mode, badgeLabel, accent)
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Text(
@@ -184,7 +204,7 @@ private fun FavoriteRow(
 }
 
 @Composable
-private fun FavoriteBadge(item: FavoriteItem, accent: Color) {
+private fun FavoriteBadge(mode: FavoriteMode, label: String?, accent: Color) {
     Box(
         modifier = Modifier
             .size(44.dp)
@@ -192,12 +212,18 @@ private fun FavoriteBadge(item: FavoriteItem, accent: Color) {
             .background(accent),
         contentAlignment = Alignment.Center,
     ) {
-        val label = item.lineLabel
         if (label != null && label.isNotEmpty()) {
-            Text(label, color = Color.White, fontWeight = FontWeight.Black, fontSize = 17.sp, maxLines = 1)
+            Text(
+                label,
+                color = Color.White,
+                fontWeight = FontWeight.Black,
+                fontSize = 17.sp,
+                maxLines = 1,
+                modifier = Modifier.padding(horizontal = 2.dp),
+            )
         } else {
             Icon(
-                imageVector = if (item.mode == FavoriteMode.BICI) Icons.Filled.DirectionsBike else Icons.Filled.DirectionsBus,
+                imageVector = if (mode == FavoriteMode.BICI) Icons.Filled.DirectionsBike else Icons.Filled.DirectionsBus,
                 contentDescription = null,
                 tint = Color.White,
                 modifier = Modifier.size(22.dp),
@@ -235,11 +261,7 @@ private suspend fun subtitleFor(item: FavoriteItem, ecobici: Map<String, Ecobici
         val a = BaApi.shared.subteArrivals(item.name).minByOrNull { it.secondsUntil } ?: return null
         "${Formatting.etaText(a.secondsUntil)} · a ${a.destinationName}"
     }.getOrNull()
-    FavoriteMode.BONDI -> runCatching {
-        val a = ObaApi.shared.stopArrivals(item.refId).firstOrNull() ?: return null
-        val estado = if (a.isLive) "en vivo" else "prog"
-        "${a.lineShort} · ${Formatting.etaText(a.secondsUntil)} $estado"
-    }.getOrNull()
+    FavoriteMode.BONDI -> null // se resuelve aparte (badge = número de línea + subtítulo)
     FavoriteMode.BICI -> ecobici[item.refId]?.let { st ->
         val bikes = "${st.bikesTotal} ${if (st.bikesTotal == 1) "bici" else "bicis"}"
         val docks = "${st.docksAvailable} ${if (st.docksAvailable == 1) "anclaje" else "anclajes"}"
