@@ -17,12 +17,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DirectionsBus
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.material.icons.rounded.DirectionsTransit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -72,6 +76,9 @@ fun ColectivoStopBoardScreen(stopId: String, stopName: String, stopPoint: GeoPoi
     var lastUpdated by remember(stopId) { mutableStateOf<Instant?>(null) }
     var reloadKey by remember(stopId) { mutableIntStateOf(0) }
 
+    val favs by com.alandaitch.anden.data.store.FavoritesStore.shared.itemsFlow.collectAsState()
+    val isFav = favs.any { it.mode == com.alandaitch.anden.data.store.FavoriteMode.BONDI && it.refId == stopId }
+
     LaunchedEffect(stopId, reloadKey) {
         if (arrivals.isEmpty()) phase = ColectivoPhase.Loading
         while (true) {
@@ -106,8 +113,26 @@ fun ColectivoStopBoardScreen(stopId: String, stopName: String, stopPoint: GeoPoi
                     lastUpdated = lastUpdated,
                     dark = dark,
                     onGo = { stopPoint?.let { MapsOpener.walk(context, it, stopName) } },
-                    onTransit = { stopPoint?.let { MapsOpener.transit(context, it, stopName) } }
+                    onTransit = { stopPoint?.let { MapsOpener.transit(context, it, stopName) } },
+                    isFavorite = isFav,
+                    onToggleFav = stopPoint?.let {
+                        {
+                            com.alandaitch.anden.data.store.FavoritesStore.shared.toggle(
+                                com.alandaitch.anden.data.store.FavoriteItem.bondi(stopId, stopName, it)
+                            )
+                        }
+                    },
                 )
+            }
+
+            if (stopPoint != null && arrivals.isNotEmpty()) {
+                item(key = "minimap") {
+                    com.alandaitch.anden.ui.map.MiniMapView(
+                        stop = stopPoint,
+                        vehicle = arrivals.firstOrNull { it.vehicle != null }?.vehicle,
+                        vehicleColorArgb = 0xFF22C55E.toInt(),
+                    )
+                }
             }
 
             when (val p = phase) {
@@ -154,7 +179,9 @@ private fun ColectivoHeader(
     lastUpdated: Instant?,
     dark: Boolean,
     onGo: () -> Unit,
-    onTransit: () -> Unit
+    onTransit: () -> Unit,
+    isFavorite: Boolean = false,
+    onToggleFav: (() -> Unit)? = null,
 ) {
     Column(
         Modifier
@@ -164,7 +191,11 @@ private fun ColectivoHeader(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Box(
                 Modifier
                     .size(46.dp)
@@ -174,7 +205,7 @@ private fun ColectivoHeader(
             ) {
                 Icon(Icons.Rounded.DirectionsBus, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
             }
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     stopName,
                     color = Palette.textPrimary(dark),
@@ -184,6 +215,15 @@ private fun ColectivoHeader(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text("Parada de colectivo", color = Palette.textSecondary(dark), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            }
+            if (onToggleFav != null) {
+                IconButton(onClick = onToggleFav) {
+                    Icon(
+                        if (isFavorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
+                        contentDescription = if (isFavorite) "Quitar de favoritos" else "Agregar a favoritos",
+                        tint = if (isFavorite) Palette.minorDelay else Palette.textSecondary(dark),
+                    )
+                }
             }
         }
 

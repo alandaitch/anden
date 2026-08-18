@@ -27,12 +27,7 @@ struct NextTrainProvider: TimelineProvider {
 
             // Si el snapshot está viejo (>2 min), intentamos refrescar directo.
             if let current = snapshot, current.age > 120 {
-                if let fresh = await WidgetSnapshot.refreshInWidget(
-                    stationId: current.stationId,
-                    stationName: current.stationName,
-                    fallbackShortCode: current.lineShortCode,
-                    fallbackColorHex: current.lineColorHex
-                ) {
+                if let fresh = await WidgetSnapshot.refreshInWidget(previous: current) {
                     snapshot = fresh
                 }
             }
@@ -52,8 +47,8 @@ struct NextTrainWidget: Widget {
         StaticConfiguration(kind: "NextTrainWidget", provider: NextTrainProvider()) { entry in
             NextTrainEntryView(entry: entry)
         }
-        .configurationDisplayName("Próximo tren")
-        .description("El próximo arribo en tu estación favorita.")
+        .configurationDisplayName("Próximo arribo")
+        .description("El próximo arribo en tu parada favorita (tren, subte o colectivo).")
         .supportedFamilies([
             .systemSmall,
             .systemMedium,
@@ -111,12 +106,21 @@ struct WidgetLineBadge: View {
             .fill(Color(hex: colorHex))
             .frame(width: size, height: size)
             .overlay(
-                Text(shortCode)
-                    .font(.anden(size * 0.42, weight: .heavy))
-                    .foregroundStyle(.white)
-                    .minimumScaleFactor(0.6)
-                    .lineLimit(1)
-                    .padding(.horizontal, 1)
+                Group {
+                    if shortCode.isEmpty {
+                        // Colectivo: la parada no tiene una única línea.
+                        Image(systemName: "bus.fill")
+                            .font(.system(size: size * 0.5, weight: .bold))
+                            .foregroundStyle(.white)
+                    } else {
+                        Text(shortCode)
+                            .font(.anden(size * 0.42, weight: .heavy))
+                            .foregroundStyle(.white)
+                            .minimumScaleFactor(0.6)
+                            .lineLimit(1)
+                            .padding(.horizontal, 1)
+                    }
+                }
             )
     }
 }
@@ -265,9 +269,9 @@ struct RectangularWidgetView: View {
         let next = snapshot.arrivals[0]
         VStack(alignment: .leading, spacing: 1) {
             HStack(spacing: 4) {
-                Image(systemName: "tram.fill")
+                Image(systemName: snapshot.modeIcon)
                     .font(.system(size: 11, weight: .bold))
-                Text("\(snapshot.lineShortCode) · \(snapshot.stationName)")
+                Text(snapshot.lineShortCode.isEmpty ? snapshot.stationName : "\(snapshot.lineShortCode) · \(snapshot.stationName)")
                     .font(.anden(12, weight: .semibold))
                     .lineLimit(1)
             }
@@ -316,7 +320,7 @@ struct InlineWidgetView: View {
     var body: some View {
         let next = snapshot.arrivals[0]
         HStack(spacing: 3) {
-            Image(systemName: "tram.fill")
+            Image(systemName: snapshot.modeIcon)
             Text("\(next.destino) ")
             Text(next.eta, style: .relative)
         }
@@ -333,7 +337,7 @@ struct EmptyWidgetView: View {
         case .accessoryInline:
             HStack(spacing: 3) {
                 Image(systemName: "tram.fill")
-                Text("Elegí tu estación")
+                Text("Elegí un favorito")
             }
         case .accessoryCircular:
             VStack(spacing: 1) {
@@ -345,7 +349,7 @@ struct EmptyWidgetView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Label("Andén", systemImage: "tram.fill")
                     .font(.anden(13, weight: .semibold))
-                Text("Elegí tu estación en la app")
+                Text("Elegí un favorito en la app")
                     .font(.anden(11))
                     .foregroundStyle(.secondary)
             }
@@ -355,7 +359,7 @@ struct EmptyWidgetView: View {
                 Image(systemName: "tram.fill")
                     .font(.system(size: 26, weight: .semibold))
                     .foregroundStyle(Palette.brand)
-                Text("Elegí tu estación en Andén")
+                Text("Elegí un favorito en Andén")
                     .font(.anden(13, weight: .medium))
                     .foregroundStyle(Palette.textSecondary)
                     .multilineTextAlignment(.center)
@@ -373,21 +377,21 @@ struct NoTrainsWidgetView: View {
         switch family {
         case .accessoryInline:
             HStack(spacing: 3) {
-                Image(systemName: "tram.fill")
-                Text("Sin trenes próximos")
+                Image(systemName: snapshot.modeIcon)
+                Text("Sin arribos próximos")
             }
         case .accessoryCircular:
             VStack(spacing: 1) {
-                Text(snapshot.lineShortCode).font(.anden(11, weight: .heavy))
+                Image(systemName: snapshot.modeIcon).font(.system(size: 12, weight: .bold))
                 Image(systemName: "moon.zzz.fill").font(.system(size: 12))
             }
             .widgetAccentable()
         case .accessoryRectangular:
             VStack(alignment: .leading, spacing: 2) {
-                Text("\(snapshot.lineShortCode) · \(snapshot.stationName)")
+                Text(snapshot.lineShortCode.isEmpty ? snapshot.stationName : "\(snapshot.lineShortCode) · \(snapshot.stationName)")
                     .font(.anden(12, weight: .semibold))
                     .lineLimit(1)
-                Text("Sin trenes próximos")
+                Text("Sin arribos próximos")
                     .font(.anden(11))
                     .foregroundStyle(.secondary)
             }
@@ -405,7 +409,7 @@ struct NoTrainsWidgetView: View {
                 Image(systemName: "moon.zzz.fill")
                     .font(.system(size: 22))
                     .foregroundStyle(Palette.textSecondary)
-                Text("Sin trenes próximos")
+                Text("Sin arribos próximos")
                     .font(.anden(12, weight: .medium))
                     .foregroundStyle(Palette.textSecondary)
             }

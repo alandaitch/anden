@@ -21,9 +21,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.material.icons.rounded.DirectionsBike
 import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -80,6 +83,7 @@ fun EcobiciScreen() {
     val liveLocation by provider.location.collectAsState()
 
     var stations by remember { mutableStateOf<List<EcobiciStation>>(emptyList()) }
+    val favs by com.alandaitch.anden.data.store.FavoritesStore.shared.itemsFlow.collectAsState()
     var phase by remember { mutableStateOf<EcobiciPhase>(EcobiciPhase.Loading) }
     var lastUpdated by remember { mutableStateOf<Instant?>(null) }
     var reloadKey by remember { mutableIntStateOf(0) }
@@ -176,7 +180,18 @@ fun EcobiciScreen() {
                         }
                     }
                     items(sorted, key = { it.first.id }) { (station, distance) ->
-                        EcobiciStationRow(station, distance, dark) {
+                        val isFav = favs.any {
+                            it.mode == com.alandaitch.anden.data.store.FavoriteMode.BICI && it.refId == station.id
+                        }
+                        EcobiciStationRow(
+                            station, distance, dark,
+                            isFavorite = isFav,
+                            onToggleFav = {
+                                com.alandaitch.anden.data.store.FavoritesStore.shared.toggle(
+                                    com.alandaitch.anden.data.store.FavoriteItem.bici(station)
+                                )
+                            },
+                        ) {
                             MapsOpener.walk(context, station.coordinate, station.displayName)
                         }
                     }
@@ -191,6 +206,8 @@ private fun EcobiciStationRow(
     station: EcobiciStation,
     distanceMeters: Double?,
     dark: Boolean,
+    isFavorite: Boolean = false,
+    onToggleFav: (() -> Unit)? = null,
     onGo: () -> Unit
 ) {
     val inService = station.status == "IN_SERVICE"
@@ -248,6 +265,16 @@ private fun EcobiciStationRow(
         }
 
         Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            if (onToggleFav != null) {
+                IconButton(onClick = onToggleFav, modifier = Modifier.size(28.dp)) {
+                    Icon(
+                        if (isFavorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
+                        contentDescription = if (isFavorite) "Quitar de favoritos" else "Agregar a favoritos",
+                        tint = if (isFavorite) Palette.minorDelay else Palette.textSecondary(dark),
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+            }
             Text("${station.bikesTotal}", color = availabilityColor, fontSize = 26.sp, fontWeight = FontWeight.Black)
             Text(if (station.bikesTotal == 1) "bici" else "bicis", color = Palette.textSecondary(dark), fontSize = 11.sp, fontWeight = FontWeight.Medium)
             GoButton(onClick = onGo)

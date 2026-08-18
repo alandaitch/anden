@@ -92,10 +92,20 @@ actor ObaClient {
                 headsign: a.tripHeadsign ?? "",
                 eta: eta,
                 secondsUntil: max(0, secs),
-                isLive: Self.isLive(a)
+                isLive: Self.isLive(a),
+                vehicleCoordinate: Self.liveVehicleCoordinate(a)
             ))
         }
         return out.sorted { $0.secondsUntil < $1.secondsUntil }
+    }
+
+    // Posición GPS del coche SOLO si OBA la da en vivo (tripStatus.predicted).
+    // Prefiere position (proyectada al recorrido); si no, el último GPS crudo.
+    private static func liveVehicleCoordinate(_ a: ObaArrivalDTO) -> CLLocationCoordinate2D? {
+        guard let ts = a.tripStatus, (ts.predicted ?? false) else { return nil }
+        let c = ts.position ?? ts.lastKnownLocation
+        guard let lat = c?.lat, let lon = c?.lon, lat != 0, lon != 0 else { return nil }
+        return CLLocationCoordinate2D(latitude: lat, longitude: lon)
     }
 
     // MARK: - Helpers de arribo
@@ -222,4 +232,19 @@ struct ObaArrivalDTO: Decodable {
     let scheduledArrivalTime: Double?
     let distanceFromStop: Double?
     let stopId: String?
+    let tripStatus: ObaTripStatusDTO?
+}
+
+// Estado del viaje del coche. position siempre viene, pero es GPS real
+// solo cuando predicted == true (si no, es una interpolación por horario).
+struct ObaTripStatusDTO: Decodable {
+    let predicted: Bool?
+    let position: ObaCoordDTO?
+    let lastKnownLocation: ObaCoordDTO?
+    let vehicleId: String?
+}
+
+struct ObaCoordDTO: Decodable {
+    let lat: Double?
+    let lon: Double?
 }

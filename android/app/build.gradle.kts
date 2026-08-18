@@ -21,8 +21,8 @@ android {
         applicationId = "com.alandaitch.anden"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.1"
+        versionCode = 4
+        versionName = "1.2"
         buildConfigField("String", "BA_CLIENT_ID", "\"${prop("BA_CLIENT_ID")}\"")
         buildConfigField("String", "BA_CLIENT_SECRET", "\"${prop("BA_CLIENT_SECRET")}\"")
     }

@@ -8,7 +8,7 @@ struct MiniArrival: Codable, Identifiable, Hashable {
     let eta: Date
     let delaySeconds: Int
     let statusLabel: String
-    let trackName: String?
+    let trackName: String?   // andén (solo tren); nil en subte/colectivo
 
     var id: String { "\(destino)-\(Int(eta.timeIntervalSince1970))" }
 }
@@ -23,31 +23,61 @@ extension MiniArrival {
             trackName: a.trackName
         )
     }
+
+    init(from s: SubteArrival) {
+        self.init(
+            destino: s.destinationName,
+            eta: s.eta,
+            delaySeconds: s.delay.delaySeconds ?? 0,
+            statusLabel: s.delay.label,
+            trackName: nil
+        )
+    }
+
+    init(from b: BusArrivalOba) {
+        let dest = b.headsign.isEmpty ? "Línea \(b.lineShort)" : "\(b.lineShort) · \(b.headsign)"
+        self.init(
+            destino: dest,
+            eta: b.eta ?? Date().addingTimeInterval(TimeInterval(b.secondsUntil)),
+            delaySeconds: 0,
+            statusLabel: b.isLive ? "En vivo" : "Programado",
+            trackName: nil
+        )
+    }
 }
 
 // Snapshot que la app escribe y el widget lee. Persiste en App Group.
 struct WidgetSnapshot: Codable {
-    let stationId: Int
+    let mode: FavoriteMode
+    let refId: String          // id de la parada en su modo (tren: stationId como String)
+    let stationId: Int         // solo tren (para refrescar desde el widget); 0 en otros modos
     let stationName: String
-    let lineShortCode: String
+    let lineShortCode: String  // badge; "" en colectivo (se muestra ícono de bondi)
     let lineColorHex: String
     let generatedAt: Date
     let arrivals: [MiniArrival]
 
     static let appGroup = "group.com.alandaitch.anden"
-    static let key = "widget.snapshot.v1"
+    static let key = "widget.snapshot.v2"
 
     private static var store: UserDefaults {
         UserDefaults(suiteName: appGroup) ?? .standard
     }
 
-    // Persiste el snapshot en App Group.
+    // Ícono SF Symbol según el modo.
+    var modeIcon: String {
+        switch mode {
+        case .tren, .subte: return "tram.fill"
+        case .bondi: return "bus.fill"
+        case .bici: return "bicycle"
+        }
+    }
+
     static func write(_ snapshot: WidgetSnapshot) {
         guard let data = try? JSONEncoder().encode(snapshot) else { return }
         store.set(data, forKey: key)
     }
 
-    // Lee el último snapshot persistido.
     static func read() -> WidgetSnapshot? {
         guard let data = store.data(forKey: key) else { return nil }
         return try? JSONDecoder().decode(WidgetSnapshot.self, from: data)
@@ -58,6 +88,8 @@ struct WidgetSnapshot: Codable {
 
     // Snapshot de muestra para placeholders del widget.
     static let sample = WidgetSnapshot(
+        mode: .tren,
+        refId: "87",
         stationId: 87,
         stationName: "Retiro Mitre",
         lineShortCode: "MI",
@@ -72,48 +104,70 @@ struct WidgetSnapshot: Codable {
 }
 
 extension WidgetSnapshot {
-    // Corre en la app: toma la estación contextual, pide arribos y persiste el snapshot.
-    // Requiere el catálogo cargado (target app), no el del widget.
+    // Corre en la app: toma el favorito contextual (de cualquier modo con arribos)
+    // y persiste su snapshot. La app tiene catálogo y claves; el widget no.
     static func refreshFromApp() async {
-        guard let station = FavoritesStore.shared.contextualPrimary() else {
-            // Sin favoritos: no hay estación que mostrar. Dejamos el snapshot como está.
+        guard let fav = FavoritesStore.shared.contextualPrimary(among: [.tren, .subte, .bondi]) else {
             WidgetCenter.shared.reloadAllTimelines()
             return
         }
-        let line = station.line
-        do {
-            let arrivals = try await SofseClient.shared.arrivals(stationId: station.id, limit: 4)
-            let snapshot = WidgetSnapshot(
-                stationId: station.id,
-                stationName: station.nombre,
-                lineShortCode: line.shortCode,
-                lineColorHex: line.colorHex,
-                generatedAt: Date(),
-                arrivals: arrivals.prefix(4).map(MiniArrival.init(from:))
-            )
+        if let snapshot = await buildSnapshot(for: fav) {
             write(snapshot)
-        } catch {
-            // Falló la red: conservamos el snapshot previo.
         }
         WidgetCenter.shared.reloadAllTimelines()
     }
 
-    // Corre en el widget: refresca solo con el stationId conocido, sin catálogo.
-    // Conserva nombre y línea del snapshot previo como fallback.
-    static func refreshInWidget(stationId: Int, stationName: String, fallbackShortCode: String, fallbackColorHex: String) async -> WidgetSnapshot? {
-        guard let arrivals = try? await SofseClient.shared.arrivals(stationId: stationId, limit: 4) else {
+    // Arma el snapshot pidiendo arribos al cliente correcto según el modo.
+    private static func buildSnapshot(for fav: FavoriteItem) async -> WidgetSnapshot? {
+        let color = fav.lineColorHex ?? "#3A4A63"
+        let code = fav.lineLabel ?? ""
+        switch fav.mode {
+        case .tren:
+            guard let stationId = Int(fav.refId),
+                  let arrivals = try? await SofseClient.shared.arrivals(stationId: stationId, limit: 4) else { return nil }
+            return WidgetSnapshot(mode: .tren, refId: fav.refId, stationId: stationId,
+                                  stationName: fav.name, lineShortCode: code, lineColorHex: color,
+                                  generatedAt: Date(), arrivals: arrivals.prefix(4).map(MiniArrival.init(from:)))
+        case .subte:
+            guard let arrivals = try? await BAClient.shared.subteArrivals(stationName: fav.name) else { return nil }
+            return WidgetSnapshot(mode: .subte, refId: fav.refId, stationId: 0,
+                                  stationName: fav.name, lineShortCode: code, lineColorHex: color,
+                                  generatedAt: Date(), arrivals: arrivals.prefix(4).map(MiniArrival.init(from:)))
+        case .bondi:
+            guard let arrivals = try? await ObaClient.shared.stopArrivals(stopId: fav.refId) else { return nil }
+            return WidgetSnapshot(mode: .bondi, refId: fav.refId, stationId: 0,
+                                  stationName: fav.name, lineShortCode: "", lineColorHex: color,
+                                  generatedAt: Date(), arrivals: arrivals.prefix(4).map(MiniArrival.init(from:)))
+        case .bici:
             return nil
         }
-        let line = arrivals.first?.line
-        let snapshot = WidgetSnapshot(
-            stationId: stationId,
-            stationName: stationName,
-            lineShortCode: line?.shortCode ?? fallbackShortCode,
-            lineColorHex: line?.colorHex ?? fallbackColorHex,
-            generatedAt: Date(),
-            arrivals: arrivals.prefix(4).map(MiniArrival.init(from:))
-        )
-        write(snapshot)
-        return snapshot
+    }
+
+    // Corre en el widget: refresca sin catálogo. Tren y colectivo tienen fuente
+    // sin clave secreta (SOFSE auto-token / OBA key `web`); subte/bici conservan
+    // el snapshot que dejó la app.
+    static func refreshInWidget(previous: WidgetSnapshot) async -> WidgetSnapshot? {
+        switch previous.mode {
+        case .tren:
+            guard let arrivals = try? await SofseClient.shared.arrivals(stationId: previous.stationId, limit: 4) else { return nil }
+            let line = arrivals.first?.line
+            let snapshot = WidgetSnapshot(mode: .tren, refId: previous.refId, stationId: previous.stationId,
+                                          stationName: previous.stationName,
+                                          lineShortCode: line?.shortCode ?? previous.lineShortCode,
+                                          lineColorHex: line?.colorHex ?? previous.lineColorHex,
+                                          generatedAt: Date(), arrivals: arrivals.prefix(4).map(MiniArrival.init(from:)))
+            write(snapshot)
+            return snapshot
+        case .bondi:
+            guard let arrivals = try? await ObaClient.shared.stopArrivals(stopId: previous.refId) else { return nil }
+            let snapshot = WidgetSnapshot(mode: .bondi, refId: previous.refId, stationId: 0,
+                                          stationName: previous.stationName,
+                                          lineShortCode: previous.lineShortCode, lineColorHex: previous.lineColorHex,
+                                          generatedAt: Date(), arrivals: arrivals.prefix(4).map(MiniArrival.init(from:)))
+            write(snapshot)
+            return snapshot
+        default:
+            return nil
+        }
     }
 }

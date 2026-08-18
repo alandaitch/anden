@@ -81,18 +81,34 @@ final class ColectivoStopViewModel {
 // Tablero de arribos de una parada de colectivo.
 struct ColectivoStopBoardView: View {
     @State private var vm: ColectivoStopViewModel
+    @State private var favTrigger = 0
     @Environment(\.scenePhase) private var scenePhase
+
+    private let favorites = FavoritesStore.shared
 
     init(stop: ObaStopRef) {
         _vm = State(initialValue: ColectivoStopViewModel(stop: stop))
     }
 
     private var stop: ObaStopRef { vm.stop }
+    private var isFavorite: Bool { favorites.isFavorite(.bondi, stop.stopId) }
+    // El próximo colectivo con GPS en vivo (tripStatus.predicted). nil si es estimación.
+    private var incomingBus: CLLocationCoordinate2D? {
+        vm.arrivals.first(where: { $0.vehicleCoordinate != nil })?.vehicleCoordinate
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 header
+                if !vm.arrivals.isEmpty {
+                    StopVehicleMiniMap(
+                        stop: stop.coordinate,
+                        vehicle: incomingBus,
+                        tint: Palette.brand,
+                        vehicleIcon: "bus.fill"
+                    )
+                }
                 content
             }
             .padding(.horizontal, 16)
@@ -103,6 +119,21 @@ struct ColectivoStopBoardView: View {
         .background(Palette.background.ignoresSafeArea())
         .navigationTitle("Parada")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    favorites.toggle(.bondi(stop))
+                    favTrigger += 1
+                } label: {
+                    Image(systemName: isFavorite ? "star.fill" : "star")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(isFavorite ? Palette.minorDelay : Palette.textSecondary)
+                        .symbolEffect(.bounce, value: favTrigger)
+                }
+                .accessibilityLabel(isFavorite ? "Quitar de favoritos" : "Agregar a favoritos")
+            }
+        }
+        .sensoryFeedback(.impact(weight: .medium), trigger: favTrigger)
         .onAppear { vm.onAppear() }
         .onDisappear { vm.onDisappear() }
         .onChange(of: scenePhase) { _, phase in

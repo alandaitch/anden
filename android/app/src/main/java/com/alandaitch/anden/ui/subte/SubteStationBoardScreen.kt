@@ -17,11 +17,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.rounded.Train
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -79,6 +84,12 @@ fun SubteStationBoardScreen(stationName: String, routeId: String?) {
     val dark = isSystemInDarkTheme()
     val line = remember(routeId) { routeId?.let { SubteLine.line(it) } }
 
+    val subteStation = remember(stationName) { com.alandaitch.anden.data.catalog.SubteCatalog.shared.station(stationName) }
+    val favs by com.alandaitch.anden.data.store.FavoritesStore.shared.itemsFlow.collectAsState()
+    val isFav = subteStation != null && favs.any {
+        it.mode == com.alandaitch.anden.data.store.FavoriteMode.SUBTE && it.refId == subteStation.id
+    }
+
     var arrivals by remember(stationName, routeId) { mutableStateOf<List<SubteArrival>>(emptyList()) }
     var phase by remember(stationName, routeId) { mutableStateOf<SubteBoardPhase>(SubteBoardPhase.Loading) }
     var lastUpdated by remember(stationName, routeId) { mutableStateOf<Instant?>(null) }
@@ -117,7 +128,13 @@ fun SubteStationBoardScreen(stationName: String, routeId: String?) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                SubteBoardHeader(stationName, line, phase, lastUpdated, dark)
+                SubteBoardHeader(
+                    stationName, line, phase, lastUpdated, dark,
+                    isFavorite = isFav,
+                    onToggleFav = subteStation?.let {
+                        { com.alandaitch.anden.data.store.FavoritesStore.shared.toggle(com.alandaitch.anden.data.store.FavoriteItem.subte(it)) }
+                    },
+                )
             }
 
             when (val p = phase) {
@@ -169,7 +186,9 @@ private fun SubteBoardHeader(
     line: SubteLine?,
     phase: SubteBoardPhase,
     lastUpdated: Instant?,
-    dark: Boolean
+    dark: Boolean,
+    isFavorite: Boolean = false,
+    onToggleFav: (() -> Unit)? = null,
 ) {
     Column(
         Modifier
@@ -179,9 +198,13 @@ private fun SubteBoardHeader(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             if (line != null) SubteBadge(line = line, size = 52.dp)
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     stationName,
                     color = Palette.textPrimary(dark),
@@ -192,6 +215,15 @@ private fun SubteBoardHeader(
                 )
                 if (line != null) {
                     Text(line.nombre, color = line.color, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
+            if (onToggleFav != null) {
+                IconButton(onClick = onToggleFav) {
+                    Icon(
+                        if (isFavorite) Icons.Filled.Star else Icons.Filled.StarBorder,
+                        contentDescription = if (isFavorite) "Quitar de favoritos" else "Agregar a favoritos",
+                        tint = if (isFavorite) Palette.minorDelay else Palette.textSecondary(dark),
+                    )
                 }
             }
         }

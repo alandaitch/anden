@@ -76,6 +76,9 @@ struct BusArrivalOba: Identifiable {
     let eta: Date?
     let secondsUntil: Int
     let isLive: Bool
+    // Posición GPS del coche que viene, SOLO cuando OBA la reporta en vivo
+    // (tripStatus.predicted == true). nil si es una estimación por horario.
+    let vehicleCoordinate: CLLocationCoordinate2D?
 
     var id: String { "\(lineShort)-\(headsign)-\(Int((eta ?? .distantPast).timeIntervalSince1970))" }
 }

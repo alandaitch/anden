@@ -25,7 +25,10 @@ data class BusArrivalOba(
     val headsign: String,
     val eta: Instant?,
     val secondsUntil: Int,
-    val isLive: Boolean
+    val isLive: Boolean,
+    // Posición GPS del coche que viene, SOLO cuando OBA la da en vivo
+    // (tripStatus.predicted == true). null si es estimación por horario.
+    val vehicle: GeoPoint? = null
 ) {
     val id: String get() = "$lineShort-$headsign-${eta?.epochSecond ?: 0}"
 }

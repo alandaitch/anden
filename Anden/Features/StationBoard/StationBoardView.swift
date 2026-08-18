@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 
 // Pantalla estrella: tablero de arribos de una estación.
 struct StationBoardView: View {
@@ -13,12 +14,33 @@ struct StationBoardView: View {
     }
 
     private var station: Station { vm.station }
-    private var isFavorite: Bool { favorites.isFavorite(station.id) }
+    private var isFavorite: Bool { favorites.isFavorite(.tren, String(station.id)) }
+
+    // Mostramos el mini-mapa cuando hay servicio (arribos en vivo o programados).
+    private var showsMap: Bool {
+        switch vm.phase {
+        case .live, .scheduled: return true
+        default: return false
+        }
+    }
+    // El próximo tren con GPS reportado (falta en ~46% de los arribos).
+    private var incomingTrain: CLLocationCoordinate2D? {
+        vm.arrivals.first(where: { $0.trainLocation != nil })?.trainLocation
+    }
 
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 16, pinnedViews: []) {
                 header
+
+                if showsMap {
+                    StopVehicleMiniMap(
+                        stop: station.coordinate,
+                        vehicle: incomingTrain,
+                        tint: station.line.color,
+                        vehicleIcon: "tram.fill"
+                    )
+                }
 
                 if vm.hasMultipleGroups && vm.phase != .unavailable {
                     groupChips
@@ -113,7 +135,7 @@ struct StationBoardView: View {
 
     private var favoriteButton: some View {
         Button {
-            favorites.toggle(station.id)
+            favorites.toggle(.train(station))
             favTrigger += 1
         } label: {
             Image(systemName: isFavorite ? "star.fill" : "star")

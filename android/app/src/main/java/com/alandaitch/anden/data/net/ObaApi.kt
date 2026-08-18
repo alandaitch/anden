@@ -109,9 +109,22 @@ class ObaApi(
                 headsign = a.tripHeadsign ?: "",
                 eta = Instant.ofEpochSecond(etaSec),
                 secondsUntil = secondsUntil,
-                isLive = predicted
+                isLive = predicted,
+                vehicle = liveVehicle(a)
             )
         }.sortedBy { it.secondsUntil }
+    }
+
+    // Posición GPS del coche SOLO si OBA la da en vivo (tripStatus.predicted).
+    // Prefiere position (proyectada al recorrido); si no, el último GPS crudo.
+    private fun liveVehicle(a: ObaArrival): GeoPoint? {
+        val ts = a.tripStatus ?: return null
+        if (ts.predicted != true) return null
+        val c = ts.position ?: ts.lastKnownLocation ?: return null
+        val lat = c.lat ?: return null
+        val lon = c.lon ?: return null
+        if (lat == 0.0 || lon == 0.0) return null
+        return GeoPoint(lat, lon)
     }
 
     // MARK: - Endpoints crudos
@@ -200,5 +213,22 @@ private data class ObaArrival(
     val predictedArrivalTime: Long? = null,
     val scheduledArrivalTime: Long? = null,
     val distanceFromStop: Double? = null,
-    val stopId: String? = null
+    val stopId: String? = null,
+    val tripStatus: ObaTripStatus? = null
+)
+
+// Estado del viaje del coche. position siempre viene, pero es GPS real
+// solo cuando predicted == true (si no, es una interpolación por horario).
+@Serializable
+private data class ObaTripStatus(
+    val predicted: Boolean? = null,
+    val position: ObaCoord? = null,
+    val lastKnownLocation: ObaCoord? = null,
+    val vehicleId: String? = null
+)
+
+@Serializable
+private data class ObaCoord(
+    val lat: Double? = null,
+    val lon: Double? = null
 )

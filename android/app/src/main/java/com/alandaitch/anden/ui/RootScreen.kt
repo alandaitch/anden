@@ -146,7 +146,16 @@ fun RootScreen() {
                 )
             }
             composable(Tab.FAVORITOS) {
-                FavoritesScreen(onOpenTren = goTren)
+                FavoritesScreen(
+                    onOpenTren = goTren,
+                    onOpenSubte = goSubte,
+                    onOpenBondi = { stopId, name, lat, lng ->
+                        navController.navigate(
+                            "bondi/${Uri.encode(stopId)}?name=${Uri.encode(name)}&lat=$lat&lng=$lng"
+                        )
+                    },
+                    onOpenBici = { navController.navigate("bici") },
+                )
             }
             composable(Tab.MAPA) {
                 MapScreen(onOpenTren = goTren, onOpenSubte = goSubte)

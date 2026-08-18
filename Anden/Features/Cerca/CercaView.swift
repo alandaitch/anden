@@ -755,6 +755,10 @@ private extension CercaRoute {
 struct EcobiciStopDetailView: View {
     let station: EcobiciStation
 
+    private let favorites = FavoritesStore.shared
+    @State private var favTrigger = 0
+    private var isFavorite: Bool { favorites.isFavorite(.bici, station.id) }
+
     private var inService: Bool { station.status == "IN_SERVICE" }
 
     private var availabilityColor: Color {
@@ -782,6 +786,21 @@ struct EcobiciStopDetailView: View {
         .background(Palette.background.ignoresSafeArea())
         .navigationTitle("EcoBici")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    favorites.toggle(.bici(station))
+                    favTrigger += 1
+                } label: {
+                    Image(systemName: isFavorite ? "star.fill" : "star")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(isFavorite ? Palette.minorDelay : Palette.textSecondary)
+                        .symbolEffect(.bounce, value: favTrigger)
+                }
+                .accessibilityLabel(isFavorite ? "Quitar de favoritos" : "Agregar a favoritos")
+            }
+        }
+        .sensoryFeedback(.impact(weight: .medium), trigger: favTrigger)
     }
 
     private var header: some View {

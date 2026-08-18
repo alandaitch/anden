@@ -115,13 +115,18 @@ final class SubteBoardViewModel {
 // Tablero de arribos de una estación de subte.
 struct SubteStationBoardView: View {
     @State private var vm: SubteBoardViewModel
+    @State private var favTrigger = 0
     @Environment(\.scenePhase) private var scenePhase
+
+    private let favorites = FavoritesStore.shared
 
     init(stationName: String, line: SubteLine? = nil) {
         _vm = State(initialValue: SubteBoardViewModel(stationName: stationName, line: line))
     }
 
     private var stationName: String { vm.stationName }
+    private var subteStation: SubteStation? { SubteCatalog.shared.station(name: stationName) }
+    private var isFavorite: Bool { subteStation.map { favorites.isFavorite(.subte, $0.id) } ?? false }
 
     var body: some View {
         Group {
@@ -134,6 +139,23 @@ struct SubteStationBoardView: View {
         .background(Palette.background.ignoresSafeArea())
         .navigationTitle(stationName)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if let st = subteStation {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        favorites.toggle(.subte(st))
+                        favTrigger += 1
+                    } label: {
+                        Image(systemName: isFavorite ? "star.fill" : "star")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(isFavorite ? Palette.minorDelay : Palette.textSecondary)
+                            .symbolEffect(.bounce, value: favTrigger)
+                    }
+                    .accessibilityLabel(isFavorite ? "Quitar de favoritos" : "Agregar a favoritos")
+                }
+            }
+        }
+        .sensoryFeedback(.impact(weight: .medium), trigger: favTrigger)
         .onAppear { vm.onAppear() }
         .onDisappear { vm.onDisappear() }
         .onChange(of: scenePhase) { _, phase in

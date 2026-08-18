@@ -87,7 +87,8 @@ final class NotificationManager {
     // Revisa arribos de las estaciones favoritas. Notifica demora nueva (leve o importante).
     private func checkFavoritesForDelays() async {
         guard AppSettings.shared.notifDemorasEnabled else { return }
-        let stations = FavoritesStore.shared.favorites
+        // Las notificaciones de demora hoy son solo de tren.
+        let stations = FavoritesStore.shared.trainStations
         guard !stations.isEmpty else { return }
 
         let previous = loadNotifiedCache()

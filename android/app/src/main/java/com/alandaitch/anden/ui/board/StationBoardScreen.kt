@@ -48,6 +48,9 @@ import com.alandaitch.anden.data.catalog.StationCatalog
 import com.alandaitch.anden.data.model.Arrival
 import com.alandaitch.anden.data.net.ApiError
 import com.alandaitch.anden.data.net.SofseApi
+import androidx.compose.ui.graphics.toArgb
+import com.alandaitch.anden.data.store.FavoriteItem
+import com.alandaitch.anden.data.store.FavoriteMode
 import com.alandaitch.anden.data.store.FavoritesStore
 import com.alandaitch.anden.ui.cerca.collectAsStateSafe
 import com.alandaitch.anden.ui.components.ArrivalRow
@@ -75,7 +78,7 @@ fun StationBoardScreen(stationId: Int, onBack: () -> Unit, modifier: Modifier = 
     val station = remember(stationId) { StationCatalog.shared.station(stationId) }
 
     val favs by FavoritesStore.shared.itemsFlow.collectAsStateSafe()
-    val isFavorite = favs.any { it.stationId == stationId }
+    val isFavorite = favs.any { it.mode == FavoriteMode.TREN && it.refId == stationId.toString() }
 
     var arrivals by remember(stationId) { mutableStateOf<List<Arrival>>(emptyList()) }
     var phase by remember(stationId) { mutableStateOf(BoardPhase.LOADING) }
@@ -143,7 +146,7 @@ fun StationBoardScreen(stationId: Int, onBack: () -> Unit, modifier: Modifier = 
                         IconButton(onClick = { MapsOpener.walk(context, station.coordinate, station.nombre) }) {
                             Icon(Icons.Filled.DirectionsWalk, contentDescription = "Cómo llegar a la estación", tint = colors.textSecondary)
                         }
-                        IconButton(onClick = { FavoritesStore.shared.toggle(stationId) }) {
+                        IconButton(onClick = { FavoritesStore.shared.toggle(FavoriteItem.train(station)) }) {
                             Icon(
                                 if (isFavorite) Icons.Filled.Star else Icons.Filled.StarBorder,
                                 contentDescription = if (isFavorite) "Quitar de favoritos" else "Agregar a favoritos",
@@ -164,6 +167,15 @@ fun StationBoardScreen(stationId: Int, onBack: () -> Unit, modifier: Modifier = 
             if (station != null) {
                 item(key = "header") {
                     Header(station = station, phase = phase, lastUpdated = lastUpdated)
+                }
+                if (arrivals.isNotEmpty()) {
+                    item(key = "minimap") {
+                        com.alandaitch.anden.ui.map.MiniMapView(
+                            stop = station.coordinate,
+                            vehicle = arrivals.firstOrNull { it.trainLocation != null }?.trainLocation,
+                            vehicleColorArgb = station.line.color.toArgb(),
+                        )
+                    }
                 }
             }
             when (phase) {
