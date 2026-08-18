@@ -117,6 +117,8 @@ struct NetworkMapView: View {
 
     private var mapLayer: some View {
         Map(position: $camera) {
+            UserAnnotation()
+
             if active.contains(.trenes) {
                 ForEach(model.trainStations) { station in
                     Annotation("", coordinate: station.coordinate, anchor: .center) {

@@ -172,34 +172,34 @@ private fun header(onComoLlego: () -> Unit) {
 
 @Composable
 private fun filterChips(filter: CercaFilter, onSelect: (CercaFilter) -> Unit) {
+    // Los 5 filtros entran distribuidos, sin scroll horizontal (antes Bondi quedaba tapado).
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         for (f in CercaFilter.entries) {
-            FilterChip(f = f, selected = f == filter, onClick = { onSelect(f) })
+            FilterChip(f = f, selected = f == filter, onClick = { onSelect(f) }, modifier = Modifier.weight(1f))
         }
     }
 }
 
 @Composable
-private fun FilterChip(f: CercaFilter, selected: Boolean, onClick: () -> Unit) {
+private fun FilterChip(f: CercaFilter, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val colors = andenColors()
     Row(
-        modifier = Modifier
+        modifier = modifier
             .clip(CircleShape)
             .background(if (selected) colors.brand else colors.surface)
             .border(0.5.dp, if (selected) Color.Transparent else colors.textSecondary.copy(alpha = 0.18f), CircleShape)
             .clickableRole(onClick, f.title)
-            .padding(horizontal = 14.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+            .padding(horizontal = 4.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(f.icon, contentDescription = null, tint = if (selected) Color.White else colors.textSecondary, modifier = Modifier.size(14.dp))
-        Text(f.title, color = if (selected) Color.White else colors.textSecondary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+        Icon(f.icon, contentDescription = null, tint = if (selected) Color.White else colors.textSecondary, modifier = Modifier.size(13.dp))
+        Text(f.title, color = if (selected) Color.White else colors.textSecondary, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1)
     }
 }
 
@@ -299,8 +299,8 @@ enum class CercaFilter(val title: String, val icon: ImageVector) {
     TODOS("Todos", Icons.Filled.GridView),
     TREN("Tren", Icons.Filled.Train),
     SUBTE("Subte", Icons.Filled.DirectionsSubway),
-    BICI("Bici", Icons.Filled.DirectionsBike),
-    BONDI("Bondi", Icons.Filled.DirectionsBus);
+    BONDI("Bondi", Icons.Filled.DirectionsBus),
+    BICI("Bici", Icons.Filled.DirectionsBike);
 
     val emptyMessage: String
         get() = when (this) {

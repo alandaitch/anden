@@ -48,6 +48,7 @@ import com.alandaitch.anden.data.catalog.StationCatalog
 import com.alandaitch.anden.data.model.Arrival
 import com.alandaitch.anden.data.net.ApiError
 import com.alandaitch.anden.data.net.SofseApi
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.toArgb
 import com.alandaitch.anden.data.store.FavoriteItem
 import com.alandaitch.anden.data.store.FavoriteMode
@@ -79,6 +80,9 @@ fun StationBoardScreen(stationId: Int, onBack: () -> Unit, modifier: Modifier = 
 
     val favs by FavoritesStore.shared.itemsFlow.collectAsStateSafe()
     val isFavorite = favs.any { it.mode == FavoriteMode.TREN && it.refId == stationId.toString() }
+
+    val userLoc by com.alandaitch.anden.data.location.LocationProvider.shared.location.collectAsState()
+    val userGeo = userLoc?.let { com.alandaitch.anden.util.GeoPoint(it.latitude, it.longitude) }
 
     var arrivals by remember(stationId) { mutableStateOf<List<Arrival>>(emptyList()) }
     var phase by remember(stationId) { mutableStateOf(BoardPhase.LOADING) }
@@ -169,11 +173,17 @@ fun StationBoardScreen(stationId: Int, onBack: () -> Unit, modifier: Modifier = 
                     Header(station = station, phase = phase, lastUpdated = lastUpdated)
                 }
                 if (arrivals.isNotEmpty()) {
+                    val incoming = arrivals.firstOrNull { it.trainLocation != null }
+                    val trainRoute = incoming?.route
+                        ?.mapNotNull { StationCatalog.shared.station(it.stationId)?.coordinate }
+                        ?: emptyList()
                     item(key = "minimap") {
                         com.alandaitch.anden.ui.map.MiniMapView(
                             stop = station.coordinate,
-                            vehicle = arrivals.firstOrNull { it.trainLocation != null }?.trainLocation,
+                            vehicle = incoming?.trainLocation,
                             vehicleColorArgb = station.line.color.toArgb(),
+                            userLocation = userGeo,
+                            route = trainRoute,
                         )
                     }
                 }

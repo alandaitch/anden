@@ -48,10 +48,14 @@ data class BusLine(
     val color: Color get() = color(shortName)
 
     companion object {
-        // Paleta propia. 12 tonos legibles en fondo claro y oscuro.
+        // Paleta propia. 24 tonos legibles en fondo claro y oscuro. No hay colores
+        // oficiales por línea (OBA los devuelve vacíos), pero cada línea recibe uno
+        // estable y bien distinto vía hash del número.
         private val palette: List<String> = listOf(
             "#E4572E", "#F3A712", "#2E9E5B", "#1E7FD4", "#7B4FB5", "#D6336C",
-            "#0FA3A3", "#B5651D", "#5B7A2E", "#3D5AA9", "#C2417B", "#557A95"
+            "#0FA3A3", "#B5651D", "#5B7A2E", "#3D5AA9", "#C2417B", "#557A95",
+            "#E8590C", "#2F9E44", "#1971C2", "#9C36B5", "#C92A2A", "#0CA678",
+            "#F08C00", "#4263EB", "#AE3EC9", "#087F5B", "#5C940D", "#A61E4D"
         )
 
         // Hash determinístico (djb2) del shortName -> índice de paleta.

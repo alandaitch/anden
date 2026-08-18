@@ -24,6 +24,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -79,6 +80,14 @@ fun ColectivoStopBoardScreen(stopId: String, stopName: String, stopPoint: GeoPoi
     val favs by com.alandaitch.anden.data.store.FavoritesStore.shared.itemsFlow.collectAsState()
     val isFav = favs.any { it.mode == com.alandaitch.anden.data.store.FavoriteMode.BONDI && it.refId == stopId }
 
+    val userLoc by com.alandaitch.anden.data.location.LocationProvider.shared.location.collectAsState()
+    val userGeo = userLoc?.let { GeoPoint(it.latitude, it.longitude) }
+    var busRoute by remember(stopId) { mutableStateOf<List<GeoPoint>>(emptyList()) }
+    val incomingTripId = arrivals.firstOrNull { it.vehicle != null }?.tripId
+    LaunchedEffect(incomingTripId) {
+        busRoute = incomingTripId?.let { runCatching { ObaApi.shared.tripShape(it) }.getOrDefault(emptyList()) } ?: emptyList()
+    }
+
     LaunchedEffect(stopId, reloadKey) {
         if (arrivals.isEmpty()) phase = ColectivoPhase.Loading
         while (true) {
@@ -126,11 +135,17 @@ fun ColectivoStopBoardScreen(stopId: String, stopName: String, stopPoint: GeoPoi
             }
 
             if (stopPoint != null && arrivals.isNotEmpty()) {
+                val incoming = arrivals.firstOrNull { it.vehicle != null }
+                val busColorArgb = incoming?.let {
+                    com.alandaitch.anden.data.model.BusLine.color(it.lineShort).toArgb()
+                } ?: 0xFF22C55E.toInt()
                 item(key = "minimap") {
                     com.alandaitch.anden.ui.map.MiniMapView(
                         stop = stopPoint,
-                        vehicle = arrivals.firstOrNull { it.vehicle != null }?.vehicle,
-                        vehicleColorArgb = 0xFF22C55E.toInt(),
+                        vehicle = incoming?.vehicle,
+                        vehicleColorArgb = busColorArgb,
+                        userLocation = userGeo,
+                        route = busRoute,
                     )
                 }
             }

@@ -1,26 +1,35 @@
 import SwiftUI
 import MapKit
 
-// Mini-mapa de "tu parada + el vehículo viniendo". Solo visual (no interactivo),
-// se auto-encuadra para mostrar la parada y, si hay GPS, el coche que se acerca.
+// Mini-mapa de "tu parada + el vehículo viniendo". Solo visual (no interactivo).
+// Muestra la parada (señal), tu ubicación, el recorrido en punteado y, si hay GPS,
+// el coche que se acerca; se auto-encuadra a parada + coche.
 struct StopVehicleMiniMap: View {
     let stop: CLLocationCoordinate2D
     let vehicle: CLLocationCoordinate2D?
+    var route: [CLLocationCoordinate2D] = []
     var tint: Color = Palette.brand
     var vehicleIcon: String = "tram.fill"
-    var height: CGFloat = 156
+    var stopIcon: String = "tram.fill"
+    var height: CGFloat = 160
 
     @State private var camera: MapCameraPosition = .automatic
     @State private var pulse = false
 
     var body: some View {
         Map(position: $camera, interactionModes: []) {
+            if route.count > 1 {
+                MapPolyline(coordinates: route)
+                    .stroke(tint.opacity(0.65),
+                            style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round, dash: [1, 7]))
+            }
             Annotation("Tu parada", coordinate: stop) { stopPin }
                 .annotationTitles(.hidden)
             if let vehicle {
                 Annotation("En camino", coordinate: vehicle) { vehiclePin }
                     .annotationTitles(.hidden)
             }
+            UserAnnotation()
         }
         .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll, showsTraffic: false))
         .frame(height: height)
@@ -60,11 +69,21 @@ struct StopVehicleMiniMap: View {
         return MKCoordinateRegion(center: center, span: span)
     }
 
+    // Señal de parada: cartelito blanco con el glifo del modo (más lindo que un círculo).
     private var stopPin: some View {
-        Image(systemName: "mappin.circle.fill")
-            .font(.system(size: 26))
-            .foregroundStyle(Palette.textPrimary, .white)
-            .shadow(radius: 1.5)
+        RoundedRectangle(cornerRadius: 7, style: .continuous)
+            .fill(.white)
+            .frame(width: 28, height: 28)
+            .overlay(
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .strokeBorder(tint, lineWidth: 2.5)
+            )
+            .overlay(
+                Image(systemName: stopIcon)
+                    .font(.system(size: 14, weight: .heavy))
+                    .foregroundStyle(tint)
+            )
+            .shadow(color: .black.opacity(0.22), radius: 2.5, y: 1)
     }
 
     private var vehiclePin: some View {

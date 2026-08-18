@@ -11,6 +11,7 @@ actor ObaClient {
     private let key = "web"
     private let session: URLSession
     private let decoder = JSONDecoder()
+    private var shapeCache: [String: [CLLocationCoordinate2D]] = [:]
 
     init(session: URLSession? = nil) {
         if let session {
@@ -93,7 +94,8 @@ actor ObaClient {
                 eta: eta,
                 secondsUntil: max(0, secs),
                 isLive: Self.isLive(a),
-                vehicleCoordinate: Self.liveVehicleCoordinate(a)
+                vehicleCoordinate: Self.liveVehicleCoordinate(a),
+                tripId: a.tripId
             ))
         }
         return out.sorted { $0.secondsUntil < $1.secondsUntil }
@@ -110,6 +112,61 @@ actor ObaClient {
     private static func validCoord(_ c: ObaCoordDTO?) -> CLLocationCoordinate2D? {
         guard let lat = c?.lat, let lon = c?.lon, lat != 0, lon != 0 else { return nil }
         return CLLocationCoordinate2D(latitude: lat, longitude: lon)
+    }
+
+    // MARK: - Traza del recorrido (shape)
+
+    // Recorrido del viaje del coche: trip -> shapeId -> shape (polyline codificada).
+    // Devuelve [] ante cualquier falla. Se cachea por tripId.
+    func tripShape(tripId: String) async -> [CLLocationCoordinate2D] {
+        if let cached = shapeCache[tripId] { return cached }
+        guard let shapeId = try? await shapeId(forTrip: tripId), !shapeId.isEmpty,
+              let points = try? await shapePoints(shapeId: shapeId) else { return [] }
+        let coords = Self.decodePolyline(points)
+        shapeCache[tripId] = coords
+        return coords
+    }
+
+    private func shapeId(forTrip tripId: String) async throws -> String? {
+        let encoded = tripId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? tripId
+        let data = try await get(path: "trip/\(encoded).json", query: [:])
+        return try decode(ObaTripResponse.self, data).data?.entry?.shapeId
+    }
+
+    private func shapePoints(shapeId: String) async throws -> String? {
+        let encoded = shapeId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? shapeId
+        let data = try await get(path: "shape/\(encoded).json", query: [:])
+        return try decode(ObaShapeResponse.self, data).data?.entry?.points
+    }
+
+    // Decodifica una polyline codificada de Google en coordenadas.
+    static func decodePolyline(_ encoded: String) -> [CLLocationCoordinate2D] {
+        var coords: [CLLocationCoordinate2D] = []
+        var index = encoded.startIndex
+        let end = encoded.endIndex
+        var lat = 0, lng = 0
+        while index < end {
+            var shift = 0, result = 0
+            while true {
+                let byte = Int(encoded[index].asciiValue ?? 0) - 63
+                index = encoded.index(after: index)
+                result |= (byte & 0x1F) << shift
+                shift += 5
+                if byte < 0x20 { break }
+            }
+            lat += (result & 1) != 0 ? ~(result >> 1) : (result >> 1)
+            shift = 0; result = 0
+            while true {
+                let byte = Int(encoded[index].asciiValue ?? 0) - 63
+                index = encoded.index(after: index)
+                result |= (byte & 0x1F) << shift
+                shift += 5
+                if byte < 0x20 { break }
+            }
+            lng += (result & 1) != 0 ? ~(result >> 1) : (result >> 1)
+            coords.append(CLLocationCoordinate2D(latitude: Double(lat) / 1e5, longitude: Double(lng) / 1e5))
+        }
+        return coords
     }
 
     // MARK: - Helpers de arribo
@@ -236,6 +293,7 @@ struct ObaArrivalDTO: Decodable {
     let scheduledArrivalTime: Double?
     let distanceFromStop: Double?
     let stopId: String?
+    let tripId: String?
     let tripStatus: ObaTripStatusDTO?
 }
 
@@ -251,4 +309,24 @@ struct ObaTripStatusDTO: Decodable {
 struct ObaCoordDTO: Decodable {
     let lat: Double?
     let lon: Double?
+}
+
+private struct ObaTripResponse: Decodable {
+    let data: ObaTripData?
+}
+private struct ObaTripData: Decodable {
+    let entry: ObaTripEntry?
+}
+private struct ObaTripEntry: Decodable {
+    let shapeId: String?
+}
+
+private struct ObaShapeResponse: Decodable {
+    let data: ObaShapeData?
+}
+private struct ObaShapeData: Decodable {
+    let entry: ObaShapeEntry?
+}
+private struct ObaShapeEntry: Decodable {
+    let points: String?
 }

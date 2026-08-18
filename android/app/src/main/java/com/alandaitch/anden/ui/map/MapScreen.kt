@@ -460,6 +460,12 @@ private fun rebuildOverlays(
         }
     }
 
+    // Ubicación del usuario (punto azul), arriba de todo.
+    com.alandaitch.anden.data.location.LocationProvider.shared.lastKnown()?.let { loc ->
+        val icon = iconCache.getOrPut("me") { dot(context, 0xFF2D7DF6.toInt(), 13f, 3f, density) }
+        addMarker(GeoPoint(loc.latitude, loc.longitude), icon) { }
+    }
+
     mapView.invalidate()
 }
 

@@ -74,12 +74,12 @@ struct CercaView: View {
 
     // MARK: - Chips de filtro
 
+    // Los 5 filtros entran distribuidos, sin scroll horizontal (antes Bondi quedaba tapado).
     private var filterChips: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(CercaFilter.allCases) { f in
-                    filterChip(f)
-                }
+        HStack(spacing: 6) {
+            ForEach(CercaFilter.allCases) { f in
+                filterChip(f)
+                    .frame(maxWidth: .infinity)
             }
         }
     }
@@ -89,14 +89,17 @@ struct CercaView: View {
         return Button {
             storedFilter = f.rawValue
         } label: {
-            HStack(spacing: 6) {
+            HStack(spacing: 4) {
                 Image(systemName: f.icon)
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.system(size: 11, weight: .bold))
                 Text(f.title)
-                    .font(.anden(13, weight: .bold))
+                    .font(.anden(12, weight: .bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
+            .frame(maxWidth: .infinity)
             .foregroundStyle(selected ? .white : Palette.textSecondary)
-            .padding(.horizontal, 14)
+            .padding(.horizontal, 6)
             .padding(.vertical, 8)
             .background(
                 Capsule().fill(selected ? Palette.brand : Palette.surface)
@@ -256,8 +259,8 @@ enum CercaFilter: String, CaseIterable, Identifiable {
     case todos
     case tren
     case subte
-    case bici
     case bondi
+    case bici
 
     var id: String { rawValue }
 

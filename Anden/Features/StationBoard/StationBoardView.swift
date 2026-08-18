@@ -25,8 +25,14 @@ struct StationBoardView: View {
     }
     // El próximo tren con GPS reportado (falta en ~46% de los arribos).
     // Respeta el chip de sentido seleccionado: mira los arribos visibles, no todos.
-    private var incomingTrain: CLLocationCoordinate2D? {
-        vm.displayGroups.flatMap(\.arrivals).first(where: { $0.trainLocation != nil })?.trainLocation
+    private var incomingTrainArrival: Arrival? {
+        vm.displayGroups.flatMap(\.arrivals).first(where: { $0.trainLocation != nil })
+    }
+    private var incomingTrain: CLLocationCoordinate2D? { incomingTrainArrival?.trainLocation }
+    // Recorrido del servicio, resuelto a coordenadas de estación.
+    private var trainRoute: [CLLocationCoordinate2D] {
+        guard let route = incomingTrainArrival?.route else { return [] }
+        return route.compactMap { StationCatalog.shared.station(id: $0.stationId)?.coordinate }
     }
 
     var body: some View {
@@ -38,8 +44,10 @@ struct StationBoardView: View {
                     StopVehicleMiniMap(
                         stop: station.coordinate,
                         vehicle: incomingTrain,
+                        route: trainRoute,
                         tint: station.line.color,
-                        vehicleIcon: "tram.fill"
+                        vehicleIcon: "tram.fill",
+                        stopIcon: "tram.fill"
                     )
                 }
 

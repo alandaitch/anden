@@ -111,9 +111,57 @@ class ObaApi(
                 eta = Instant.ofEpochSecond(etaSec),
                 secondsUntil = maxOf(0, secondsUntil),
                 isLive = predicted,
-                vehicle = liveVehicle(a)
+                vehicle = liveVehicle(a),
+                tripId = a.tripId
             )
         }.sortedBy { it.secondsUntil }
+    }
+
+    // Traza del recorrido del viaje del coche: trip -> shapeId -> shape (polyline).
+    // Devuelve [] ante cualquier falla. Se cachea por tripId.
+    private val shapeCache = java.util.concurrent.ConcurrentHashMap<String, List<GeoPoint>>()
+    suspend fun tripShape(tripId: String): List<GeoPoint> {
+        shapeCache[tripId]?.let { return it }
+        val shapeId = try {
+            decode<ObaResponse<ObaTripData>>(get("trip/$tripId.json", emptyMap())).data?.entry?.shapeId
+        } catch (_: Exception) { null } ?: return emptyList()
+        if (shapeId.isEmpty()) return emptyList()
+        val points = try {
+            decode<ObaResponse<ObaShapeData>>(get("shape/$shapeId.json", emptyMap())).data?.entry?.points
+        } catch (_: Exception) { null } ?: return emptyList()
+        val coords = decodePolyline(points)
+        shapeCache[tripId] = coords
+        return coords
+    }
+
+    // Decodifica una polyline codificada de Google en coordenadas.
+    private fun decodePolyline(encoded: String): List<GeoPoint> {
+        val out = ArrayList<GeoPoint>()
+        var index = 0
+        var lat = 0
+        var lng = 0
+        while (index < encoded.length) {
+            var shift = 0
+            var result = 0
+            while (true) {
+                val b = encoded[index++].code - 63
+                result = result or ((b and 0x1F) shl shift)
+                shift += 5
+                if (b < 0x20) break
+            }
+            lat += if (result and 1 != 0) (result shr 1).inv() else result shr 1
+            shift = 0
+            result = 0
+            while (true) {
+                val b = encoded[index++].code - 63
+                result = result or ((b and 0x1F) shl shift)
+                shift += 5
+                if (b < 0x20) break
+            }
+            lng += if (result and 1 != 0) (result shr 1).inv() else result shr 1
+            out.add(GeoPoint(lat / 1e5, lng / 1e5))
+        }
+        return out
     }
 
     // Posición GPS del coche SOLO si OBA la da en vivo (tripStatus.predicted).
@@ -219,8 +267,21 @@ private data class ObaArrival(
     val scheduledArrivalTime: Long? = null,
     val distanceFromStop: Double? = null,
     val stopId: String? = null,
+    val tripId: String? = null,
     val tripStatus: ObaTripStatus? = null
 )
+
+@Serializable
+private data class ObaTripData(val entry: ObaTripEntry? = null)
+
+@Serializable
+private data class ObaTripEntry(val shapeId: String? = null)
+
+@Serializable
+private data class ObaShapeData(val entry: ObaShapeEntry? = null)
+
+@Serializable
+private data class ObaShapeEntry(val points: String? = null)
 
 // Estado del viaje del coche. position siempre viene, pero es GPS real
 // solo cuando predicted == true (si no, es una interpolación por horario).

@@ -28,7 +28,9 @@ data class BusArrivalOba(
     val isLive: Boolean,
     // Posición GPS del coche que viene, SOLO cuando OBA la da en vivo
     // (tripStatus.predicted == true). null si es estimación por horario.
-    val vehicle: GeoPoint? = null
+    val vehicle: GeoPoint? = null,
+    // Viaje del coche, para pedir la traza del recorrido (shape).
+    val tripId: String? = null
 ) {
     val id: String get() = "$lineShort-$headsign-${eta?.epochSecond ?: 0}"
 }

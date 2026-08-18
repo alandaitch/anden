@@ -90,12 +90,15 @@ struct ColectivoStopBoardView: View {
         _vm = State(initialValue: ColectivoStopViewModel(stop: stop))
     }
 
+    @State private var routePoints: [CLLocationCoordinate2D] = []
+
     private var stop: ObaStopRef { vm.stop }
     private var isFavorite: Bool { favorites.isFavorite(.bondi, stop.stopId) }
     // El próximo colectivo con GPS en vivo (tripStatus.predicted). nil si es estimación.
-    private var incomingBus: CLLocationCoordinate2D? {
-        vm.arrivals.first(where: { $0.vehicleCoordinate != nil })?.vehicleCoordinate
+    private var incomingArrival: BusArrivalOba? {
+        vm.arrivals.first(where: { $0.vehicleCoordinate != nil })
     }
+    private var incomingBus: CLLocationCoordinate2D? { incomingArrival?.vehicleCoordinate }
 
     var body: some View {
         ScrollView {
@@ -105,8 +108,10 @@ struct ColectivoStopBoardView: View {
                     StopVehicleMiniMap(
                         stop: stop.coordinate,
                         vehicle: incomingBus,
-                        tint: Palette.brand,
-                        vehicleIcon: "bus.fill"
+                        route: routePoints,
+                        tint: incomingArrival.map { BusLine.color(for: $0.lineShort) } ?? Palette.brand,
+                        vehicleIcon: "bus.fill",
+                        stopIcon: "bus.fill"
                     )
                 }
                 content
@@ -134,6 +139,13 @@ struct ColectivoStopBoardView: View {
             }
         }
         .sensoryFeedback(.impact(weight: .medium), trigger: favTrigger)
+        .task(id: incomingArrival?.tripId) {
+            if let tripId = incomingArrival?.tripId {
+                routePoints = await ObaClient.shared.tripShape(tripId: tripId)
+            } else {
+                routePoints = []
+            }
+        }
         .onAppear { vm.onAppear() }
         .onDisappear { vm.onDisappear() }
         .onChange(of: scenePhase) { _, phase in
