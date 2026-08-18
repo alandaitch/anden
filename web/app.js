@@ -2,7 +2,7 @@
 
 /* ─────────── Google Analytics (GA4) ───────────
    Pegá tu Measurement ID (G-XXXXXXXXXX) acá abajo y listo. */
-const GA_ID = ''; // ← Google Analytics: pegá el G-XXXXXXXXXX
+const GA_ID = 'G-407FNTKDJN'; // Google Analytics 4
 function initGA() {
   if (!GA_ID) return;
   const s = document.createElement('script');
@@ -371,7 +371,9 @@ async function renderCerca() {
     listEl.appendChild(stateBox('Nada cerca ahora', 'No encontramos transporte cerca tuyo en este momento.'));
     return;
   }
-  for (const r of rows) listEl.appendChild(rowEl(r));
+  const grid = el('div', 'list');
+  for (const r of rows) grid.appendChild(rowEl(r));
+  listEl.appendChild(grid);
 }
 
 async function collectTrains(rows) {
@@ -498,10 +500,16 @@ async function renderBoard(p) {
   head.appendChild(actions);
   view.appendChild(head);
 
-  if (!isNaN(lat) && mode !== 'bici' && mode !== 'subte') {
-    const mm = el('div'); mm.id = 'minimap'; view.appendChild(mm);
+  const hasMap = !isNaN(lat) && mode !== 'bici' && mode !== 'subte';
+  let list;
+  if (hasMap) {
+    const body = el('div', 'board-body');
+    const mm = el('div'); mm.id = 'minimap'; body.appendChild(mm);
+    list = el('div', 'arr-list'); body.appendChild(list);
+    view.appendChild(body);
+  } else {
+    list = el('div', 'arr-list'); view.appendChild(list);
   }
-  const list = el('div'); view.appendChild(list);
   view.appendChild(footerNote());
   list.appendChild(spinner('Buscando arribos…'));
 
@@ -618,7 +626,7 @@ async function renderFavoritos() {
     view.appendChild(footerNote());
     return;
   }
-  const list = el('div'); view.appendChild(list); view.appendChild(footerNote());
+  const list = el('div', 'list'); view.appendChild(list); view.appendChild(footerNote());
   for (const f of S.favs) {
     const color = f.mode === 'tren' ? BRAND : f.mode === 'subte' ? subteLine(f.line).color : f.mode === 'bici' ? BICI_COLOR : BRAND;
     const r = {
@@ -701,4 +709,5 @@ document.querySelectorAll('.tab').forEach((t) => { t.onclick = () => go(t.datase
 document.querySelectorAll('.tab-ico').forEach((s) => { s.innerHTML = SVG[s.dataset.ico] || ''; });
 $('#backBtn').onclick = () => { if (history.length > 1) history.back(); else go('cerca'); };
 initGA();
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 route();

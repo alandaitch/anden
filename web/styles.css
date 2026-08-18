@@ -175,7 +175,49 @@ body {
 .footer-note { text-align: center; color: var(--text2); font-size: 11px; padding: 18px 8px 2px; line-height: 1.5; }
 .footer-note a { color: var(--text2); }
 
-@media (min-width: 520px) {
-  body { padding: 0; }
-  #app { border-radius: 0; min-height: 100dvh; }
+/* Nav superior: oculta en mobile, visible en desktop */
+.topnav { display: none; gap: 4px; }
+.list { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.list .row, .list .arr { margin-bottom: 0; }
+.arr-list { display: flex; flex-direction: column; gap: 10px; }
+.arr-list .arr { margin-bottom: 0; }
+.board-body { display: block; }
+
+/* ─────────── Desktop ─────────── */
+@media (min-width: 760px) {
+  body { background: #dfe4ea; }
+  #app {
+    max-width: 1000px; min-height: 100dvh;
+    box-shadow: 0 0 60px rgba(16,24,40,.10);
+  }
+  .topbar { padding: 18px 28px; }
+  .brand-name { font-size: 26px; }
+  .tabbar { display: none; }
+  .topnav { display: flex; }
+  .topnav .tab {
+    flex: none; flex-direction: row; gap: 6px;
+    padding: 9px 16px; border-radius: 999px; font-size: 15px;
+  }
+  .topnav .tab.active { background: rgba(36,44,79,.10); color: var(--brand); }
+  #view { padding: 8px 28px 48px; }
+
+  /* Listas en 2 columnas */
+  .list { grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Chips: no ocupan todo el ancho, quedan a la izquierda */
+  .chips { max-width: 560px; }
+
+  /* Tablero: mapa + arribos lado a lado */
+  .board-head { max-width: 100%; }
+  .board-body { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 20px; align-items: start; }
+  .board-body #minimap { height: 380px; position: sticky; top: 20px; margin-bottom: 0; }
+  .board-body .arr-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .section-h { font-size: 24px; }
+  .state { padding: 64px 16px; }
+  .fullmap-wrap { height: calc(100dvh - 150px); }
+}
+
+@media (min-width: 1080px) {
+  .list { grid-template-columns: 1fr 1fr 1fr; }
 }
