@@ -1,0 +1,61 @@
+name: Reportar un error
+description: Informá un comportamiento reproducible de Andén.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        No publiques domicilios exactos, coordenadas personales ni credenciales.
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducir
+      placeholder: |
+        1. Abrí...
+        2. Elegí...
+        3. Observé...
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Resultado observado
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Resultado esperado
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Dispositivo y sistema operativo
+      placeholder: iPhone con iOS 19
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Navegador o versión
+      placeholder: Safari 19, Chrome 140 o PWA
+    validations:
+      required: true
+  - type: input
+    id: public_reference
+    attributes:
+      label: Referencia pública aproximada
+      description: Usá una estación, parada, barrio o URL pública.
+      placeholder: Estación Retiro
+    validations:
+      required: false
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacidad
+      options:
+        - label: Confirmo que eliminé datos personales y credenciales.
+          required: true
