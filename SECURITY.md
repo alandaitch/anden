@@ -2,7 +2,7 @@
 
 No publiques vulnerabilidades mediante Issues o Discussions.
 
-Usá el [reporte privado de GitHub](https://github.com/alandaitch/anden-community/security/advisories/new).
+Usá el [reporte privado de GitHub](https://github.com/alandaitch/anden/security/advisories/new).
 
 Incluí impacto, pasos mínimos y versión afectada.
 

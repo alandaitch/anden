@@ -11,4 +11,4 @@ Estas áreas orientan las próximas mejoras.
 
 El roadmap no constituye una promesa de entrega.
 
-Proponé necesidades mediante [Issues](https://github.com/alandaitch/anden-community/issues).
+Proponé necesidades mediante [Issues](https://github.com/alandaitch/anden/issues).

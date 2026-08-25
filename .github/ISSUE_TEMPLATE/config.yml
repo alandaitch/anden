@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Conversación general
-    url: https://github.com/alandaitch/anden-community/discussions
+    url: https://github.com/alandaitch/anden/discussions
     about: Usá Discussions para preguntas y propuestas tempranas.
   - name: Reporte privado de seguridad
-    url: https://github.com/alandaitch/anden-community/security/advisories/new
+    url: https://github.com/alandaitch/anden/security/advisories/new
     about: Informá vulnerabilidades sin exponer detalles públicamente.

@@ -1,5 +1,11 @@
 # Andén
 
+> Estamos ajustando la seguridad del proyecto.
+>
+> [Andén sigue disponible en anden.app](https://anden.app).
+>
+> La documentación pública vuelve pronto.
+
 [Andén](https://anden.app) reúne transporte cercano del AMBA.
 
 Incluye colectivos, trenes, subtes y estaciones EcoBici.
@@ -10,10 +16,10 @@ El código fuente de producción no se distribuye aquí.
 
 ## Participar
 
-- [Reportar un error](https://github.com/alandaitch/anden-community/issues/new?template=bug.yml)
-- [Reportar un problema de datos](https://github.com/alandaitch/anden-community/issues/new?template=data.yml)
-- [Proponer una mejora](https://github.com/alandaitch/anden-community/issues/new?template=suggestion.yml)
-- [Conversar en Discussions](https://github.com/alandaitch/anden-community/discussions)
+- [Reportar un error](https://github.com/alandaitch/anden/issues/new?template=bug.yml)
+- [Reportar un problema de datos](https://github.com/alandaitch/anden/issues/new?template=data.yml)
+- [Proponer una mejora](https://github.com/alandaitch/anden/issues/new?template=suggestion.yml)
+- [Conversar en Discussions](https://github.com/alandaitch/anden/discussions)
 
 No publiques domicilios exactos, coordenadas personales ni credenciales.
 
