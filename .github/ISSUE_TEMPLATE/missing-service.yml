@@ -1,8 +1,7 @@
-name: Reportar un problema de datos
-description: Informá horarios, recorridos, nombres o posiciones incorrectas.
-title: "[Datos]: "
+name: Reportar transporte faltante
+description: Informá una línea, ramal, estación o servicio ausente.
+title: "[Faltante]: "
 labels:
-  - bug
   - data
 body:
   - type: markdown
@@ -22,42 +21,32 @@ body:
     validations:
       required: true
   - type: input
-    id: transport
+    id: service
     attributes:
-      label: Transporte relacionado
-      placeholder: Colectivo 60, ramal F
+      label: Línea, ramal o servicio
+      placeholder: Línea 60, ramal F
     validations:
       required: true
   - type: input
-    id: public_reference
+    id: public_area
     attributes:
-      label: Referencia pública aproximada
-      placeholder: Estación Retiro o Avenida Santa Fe y Callao
-    validations:
-      required: true
-  - type: textarea
-    id: observed
-    attributes:
-      label: Dato observado
+      label: Zona pública aproximada
+      description: Indicá una estación, parada, cruce o barrio.
+      placeholder: Estación Núñez
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: Dato esperado
-    validations:
-      required: true
-  - type: input
-    id: checked_at
-    attributes:
-      label: Momento aproximado
-      placeholder: 25 de agosto, 18:30
+      label: Qué debería aparecer
+      description: Explicá brevemente la cobertura esperada.
     validations:
       required: true
   - type: input
     id: source
     attributes:
       label: Fuente oficial
+      description: Agregá un enlace público cuando exista.
       placeholder: https://sitio-oficial.example/
     validations:
       required: false
