@@ -16,7 +16,7 @@ body:
     attributes:
       label: Funcionamiento actual
     validations:
-      required: true
+      required: false
   - type: textarea
     id: expected
     attributes:
@@ -30,6 +30,13 @@ body:
       placeholder: Línea D, estación Congreso de Tucumán
     validations:
       required: false
+  - type: checkboxes
+    id: searched
+    attributes:
+      label: Revisión previa
+      options:
+        - label: Revisé que no exista una propuesta equivalente.
+          required: true
   - type: checkboxes
     id: privacy
     attributes:

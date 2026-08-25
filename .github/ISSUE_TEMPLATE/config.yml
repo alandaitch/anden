@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Abrir Andén
+    url: https://anden.app
+    about: Usá la aplicación desde el sitio oficial.
   - name: Conversación general
     url: https://github.com/alandaitch/anden/discussions
     about: Usá Discussions para preguntas y propuestas tempranas.

@@ -18,6 +18,21 @@ body:
         3. Observé...
     validations:
       required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Sección afectada
+      options:
+        - Cerca
+        - Favoritos
+        - Mapa
+        - Buscar transporte
+        - Buscar dirección
+        - Ruta
+        - Instalación de la aplicación
+        - Otra
+    validations:
+      required: true
   - type: textarea
     id: observed
     attributes:
@@ -50,6 +65,13 @@ body:
       label: Referencia pública aproximada
       description: Usá una estación, parada, barrio o URL pública.
       placeholder: Estación Retiro
+    validations:
+      required: false
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Captura o información adicional
+      description: Podés pegar una captura sin datos personales.
     validations:
       required: false
   - type: checkboxes

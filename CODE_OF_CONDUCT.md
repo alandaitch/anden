@@ -1,13 +1,39 @@
 # Código de conducta
 
-Participá con respeto, claridad y buena fe.
+## Nuestro compromiso
 
-No aceptamos acoso, discriminación, amenazas ni publicación de datos personales.
+Buscamos una comunidad respetuosa, clara y útil.
 
-Priorizá evidencia reproducible sobre ataques personales.
+Todas las personas pueden participar sin sufrir acoso ni discriminación.
 
-Los responsables podrán editar, ocultar o cerrar contenido inapropiado.
+## Comportamientos esperados
 
-Los casos graves pueden restringir futuras participaciones.
+- Compartí evidencia reproducible y referencias públicas.
+- Criticá ideas y resultados, nunca personas.
+- Aceptá correcciones con buena fe.
+- Protegé la privacidad de quienes participan.
+- Ayudá a mantener cada conversación enfocada.
 
-Reportá incidentes mediante las herramientas privadas de GitHub.
+## Comportamientos inaceptables
+
+- Acoso, amenazas o discriminación.
+- Insultos, provocaciones o ataques personales.
+- Publicación de datos personales sin autorización.
+- Spam, suplantación o manipulación deliberada.
+- Exposición pública de vulnerabilidades activas.
+
+## Alcance
+
+Estas reglas cubren Issues, Discussions y pull requests.
+
+También cubren interacciones públicas relacionadas con esta comunidad.
+
+## Aplicación
+
+Los responsables pueden editar, ocultar o cerrar contenido inapropiado.
+
+También pueden limitar futuras participaciones ante faltas reiteradas.
+
+Usá las herramientas de reporte de GitHub ante contenido abusivo.
+
+No publiques detalles sensibles para denunciar una conducta.
