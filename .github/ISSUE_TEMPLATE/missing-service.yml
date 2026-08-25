@@ -3,6 +3,7 @@ description: Informá una línea, ramal, estación o servicio ausente.
 title: "[Faltante]: "
 labels:
   - data
+  - transporte faltante
 body:
   - type: markdown
     attributes:
