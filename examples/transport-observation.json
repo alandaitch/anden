@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "mode": "bus",
+  "service": "Línea de ejemplo",
+  "destination": "Destino de ejemplo",
+  "minutes": 7,
+  "status": "expected",
+  "time_basis": "realtime",
+  "observed_at": "2026-08-25T12:00:00Z",
+  "source": {
+    "name": "Fuente oficial de ejemplo",
+    "public_reference": "https://example.com/transporte"
+  }
+}

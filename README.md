@@ -40,9 +40,24 @@ Este repositorio funciona como espacio comunitario y documental.
 
 Acá se reciben reportes, propuestas y mejoras documentales.
 
+También publica una superficie técnica segura y verificable.
+
+- [Portal documental](docs/README.md)
+- [Fuentes oficiales](docs/FUENTES.md)
+- [Estado y limitaciones](docs/ESTADO-Y-LIMITACIONES.md)
+- [Datos en vivo y programados](docs/DATOS-EN-VIVO.md)
+- [Contratos públicos](docs/CONTRATOS-PUBLICOS.md)
+- [Consultas públicas seguras](docs/CONSULTAS-SEGURAS.md)
+- [Arquitectura pública](docs/ARQUITECTURA.md)
+- [Atribuciones y licencias](docs/ATRIBUCIONES.md)
+
 El código productivo de Andén no se distribuye actualmente.
 
-Los pull requests deben limitarse a documentación comunitaria.
+Los pull requests pueden mejorar documentación, contratos y ejemplos públicos.
+
+No publicamos claves, proxies, procesos internos ni datos derivados.
+
+Tampoco ofrecemos una API pública propia.
 
 ## Información importante
 

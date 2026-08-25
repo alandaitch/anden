@@ -8,7 +8,7 @@ Este repositorio recibe aportes comunitarios sin distribuir el código productiv
 
 - Usá Issues para problemas concretos y reproducibles.
 - Usá Discussions para preguntas e ideas tempranas.
-- Usá pull requests solamente para documentación comunitaria.
+- Usá pull requests para documentación y contratos públicos.
 - Usá el reporte privado para vulnerabilidades.
 
 La guía completa está en [Soporte y reportes](SUPPORT.md).
@@ -50,17 +50,23 @@ Podés proponer una solución, pero no es obligatoria.
 
 El equipo evaluará alcance, privacidad, costos y fuentes disponibles.
 
-## Pull requests documentales
+## Pull requests públicos
 
-Los pull requests sólo pueden modificar documentación comunitaria.
+Los pull requests pueden modificar documentación, esquemas y ejemplos públicos.
 
-No envíes código, datos derivados ni integraciones.
+Los esquemas deben describir contratos públicos sanitizados.
+
+Los ejemplos deben ser mínimos, ficticios y no identificables.
+
+No envíes código productivo, datos derivados ni integraciones.
 
 Tampoco envíes información técnica interna ni credenciales.
 
 Mantené cada pull request enfocado en un único cambio.
 
 Revisá enlaces y ortografía antes de enviarlo.
+
+Ejecutá `npm ci` y `npm test` antes de enviar cambios.
 
 Cada aporte debe ser original y publicable por su autor.
 

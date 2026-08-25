@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/alandaitch/anden/schemas/transport-observation.schema.json",
+  "title": "Observación pública de transporte",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "mode", "service", "time_basis", "observed_at", "source"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "mode": { "enum": ["bus", "train", "subway", "bikeshare"] },
+    "service": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "destination": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "minutes": { "type": ["integer", "null"], "minimum": 0, "maximum": 1440 },
+    "status": { "enum": ["expected", "delayed", "suspended", "unknown"] },
+    "time_basis": { "enum": ["realtime", "scheduled", "unknown"] },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "public_reference"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "public_reference": { "type": "string", "format": "uri" }
+      }
+    }
+  }
+}

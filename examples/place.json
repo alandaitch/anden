@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "kind": "station",
+  "name": "Estación de ejemplo",
+  "public_code": "EJEMPLO-01",
+  "location": {
+    "latitude": -34.6,
+    "longitude": -58.4
+  }
+}
