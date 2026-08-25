@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/alandaitch/anden/schemas/place.schema.json",
+  "title": "Lugar público de transporte",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "kind", "name", "location"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "kind": { "enum": ["stop", "station", "bikeshare_station"] },
+    "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "public_code": { "type": "string", "minLength": 1, "maxLength": 40 },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["latitude", "longitude"],
+      "properties": {
+        "latitude": { "type": "number", "minimum": -90, "maximum": 90 },
+        "longitude": { "type": "number", "minimum": -180, "maximum": 180 }
+      }
+    }
+  }
+}
