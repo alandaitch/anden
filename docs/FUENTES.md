@@ -1,24 +1,28 @@
-# Fuentes oficiales
+# Fuentes y APIs públicas
 
 Andén combina fuentes oficiales con estándares públicos.
 
 Cada fuente conserva su autoridad, licencia y limitaciones.
 
-| Fuente | Uso público explicado | Tipo | Referencia oficial |
+Este archivo enlaza solamente recursos accesibles públicamente.
+
+No documenta endpoints, proxies, claves ni procesos internos de Andén.
+
+| Fuente | Acceso público | Uso explicado | Referencia pública |
 | --- | --- | --- | --- |
-| SOFSE / Trenes Argentinos | Horarios, recorridos y novedades ferroviarias | Programado y operativo | [Portal oficial][sofse] |
-| Datos Transporte | Catálogo ferroviario abierto | Programado | [Dataset SOFSE][datos-trenes] |
-| SUBE / Cuándo SUBO | Predicciones de colectivos disponibles al pasajero | En vivo | [Servicio oficial][sube] |
-| OneBusAway | Modelo abierto para llegadas y paradas | Contrato técnico | [Documentación][oba] |
-| Transporte BA | Información multimodal de Ciudad | Variable | [Portal oficial][ba-api] |
-| Buenos Aires Data | Catálogo público de movilidad | Programado | [Portal de datos][ba-data] |
-| USIG | Búsqueda y geocodificación de lugares | Consulta | [Documentación oficial][usig] |
-| EcoBici | Estaciones y capacidad pública | Programado | [Dataset oficial][ecobici] |
-| GBFS | Disponibilidad de bicicletas compartidas | En vivo | [Especificación][gbfs] |
-| Ferrovías | Horarios del Belgrano Norte | Programado | [Horarios oficiales][ferrovias] |
-| Metrovías | Horarios del Urquiza | Programado | [Horarios oficiales][metrovias] |
-| IGN / Argenmap | Mapa base y geoservicios | Cartografía | [Geoservicios][ign] |
-| OpenStreetMap | Cartografía complementaria | Cartografía | [Atribución][osm] |
+| SOFSE / Trenes Argentinos | Portal oficial | Horarios, recorridos y novedades | [Portal oficial][sofse] |
+| Datos Transporte | Dataset descargable | Catálogo ferroviario abierto | [Dataset SOFSE][datos-trenes] |
+| SUBE / Cuándo SUBO | Servicio para pasajeros | Predicciones disponibles | [Servicio oficial][sube] |
+| OneBusAway | Documentación abierta | Modelo para llegadas y paradas | [Documentación][oba] |
+| Transporte BA | Portal documentado | Información multimodal variable | [Portal oficial][ba-api] |
+| Buenos Aires Data | Catálogo abierto | Datasets de movilidad | [Portal de datos][ba-data] |
+| USIG | Documentación pública | Búsqueda y geocodificación | [Documentación oficial][usig] |
+| EcoBici | Dataset descargable | Estaciones y capacidad | [Dataset oficial][ecobici] |
+| GBFS | Especificación abierta | Bicicletas compartidas | [Especificación][gbfs] |
+| Ferrovías | Sitio oficial | Horarios del Belgrano Norte | [Horarios oficiales][ferrovias] |
+| Metrovías | Sitio oficial | Horarios del Urquiza | [Horarios oficiales][metrovias] |
+| IGN / Argenmap | Geoservicios documentados | Cartografía base | [Geoservicios][ign] |
+| OpenStreetMap | Proyecto y políticas públicas | Cartografía complementaria | [Atribución][osm] |
 
 ## Criterios de uso
 
@@ -35,6 +39,8 @@ No inferimos una licencia ausente.
 No redistribuimos material sin permiso identificable.
 
 La disponibilidad observada no constituye un acuerdo de nivel de servicio.
+
+Consultá [Atribuciones y licencias](ATRIBUCIONES.md) antes de reutilizar datos.
 
 [ba-api]: https://buenosaires.gob.ar/gcaba_historico/infraestructura/movilidad/api-transporte
 [ba-data]: https://data.buenosaires.gob.ar/

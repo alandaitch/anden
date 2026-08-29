@@ -1,17 +1,18 @@
 # Portal documental
 
-Esta documentación explica datos, límites y contratos públicos de Andén.
+Esta documentación explica fuentes, límites y contratos públicos de Andén.
 
 No describe la implementación productiva.
 
+La participación de este portal está dirigida a personas.
+
 ## Contenido
 
-- [Fuentes oficiales](FUENTES.md)
+- [Fuentes y APIs públicas](FUENTES.md)
 - [Datos en vivo y programados](DATOS-EN-VIVO.md)
 - [Estado y limitaciones](ESTADO-Y-LIMITACIONES.md)
 - [Contratos públicos](CONTRATOS-PUBLICOS.md)
 - [Consultas públicas seguras](CONSULTAS-SEGURAS.md)
-- [Arquitectura pública](ARQUITECTURA.md)
 - [Atribuciones y licencias](ATRIBUCIONES.md)
 
 Los ejemplos usan datos ficticios.
@@ -19,5 +20,7 @@ Los ejemplos usan datos ficticios.
 Los esquemas describen una interfaz documental estable.
 
 No representan respuestas internas exactas.
+
+La arquitectura, automatizaciones y procesos operativos permanecen privados.
 
 Última revisión documental: 25 de agosto de 2026.
