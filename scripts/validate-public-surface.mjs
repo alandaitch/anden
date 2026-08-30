@@ -2,6 +2,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { extname, join, relative } from "node:path";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
+import { parse as parseYaml } from "yaml";
 
 const root = new URL("../", import.meta.url);
 const textExtensions = new Set([".md", ".json", ".mjs", ".yml"]);
@@ -39,6 +40,7 @@ for (const path of allFiles) {
     if (pattern.test(content)) failures.push(`${label}: patrón privado ${pattern}`);
   }
   if (extname(path) === ".json") JSON.parse(content);
+  if (extname(path) === ".yml") parseYaml(content);
   if (extname(path) !== ".md") continue;
   for (const match of content.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
     const target = match[1].split("#", 1)[0];

@@ -38,24 +38,27 @@ Encontrá ejemplos y criterios en [Cómo participar](CONTRIBUTING.md).
 
 Este repositorio funciona como espacio comunitario y documental.
 
-Acá se reciben reportes, propuestas y mejoras documentales.
+La participación pública está dirigida exclusivamente a personas.
 
-También publica una superficie técnica segura y verificable.
+Acá se reciben reportes, propuestas y mejoras documentales humanas.
+
+También publica referencias técnicas realmente públicas.
 
 - [Portal documental](docs/README.md)
-- [Fuentes oficiales](docs/FUENTES.md)
+- [Fuentes y APIs públicas](docs/FUENTES.md)
 - [Estado y limitaciones](docs/ESTADO-Y-LIMITACIONES.md)
 - [Datos en vivo y programados](docs/DATOS-EN-VIVO.md)
 - [Contratos públicos](docs/CONTRATOS-PUBLICOS.md)
 - [Consultas públicas seguras](docs/CONSULTAS-SEGURAS.md)
-- [Arquitectura pública](docs/ARQUITECTURA.md)
 - [Atribuciones y licencias](docs/ATRIBUCIONES.md)
 
 El código productivo de Andén no se distribuye actualmente.
 
 Los pull requests pueden mejorar documentación, contratos y ejemplos públicos.
 
-No publicamos claves, proxies, procesos internos ni datos derivados.
+No publicamos arquitectura, claves, proxies ni procesos internos.
+
+Tampoco publicamos SEO interno, automatizaciones ni know-how productivo.
 
 Tampoco ofrecemos una API pública propia.
 

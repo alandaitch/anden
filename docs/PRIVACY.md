@@ -23,7 +23,7 @@ Andén es una app no oficial de información de transporte del AMBA (Buenos Aire
 - Las búsquedas de direcciones no tienen caché persistente en Andén.
 - La dirección elegida y sus coordenadas quedan en tu dispositivo.
 - Para colectivos cercanos, puede enviarse a OneBusAway/SUBE.
-- La PWA reduce su precisión antes de enviarla al proxy.
+- La PWA reduce su precisión antes de consultar el servicio.
 - Una referencia redondeada del área puede permanecer hasta 30 minutos.
 - Cómo llegar envía origen y destino al ruteador oficial USIG.
 - Una clave derivada del recorrido puede permanecer hasta 15 minutos.
